@@ -1,0 +1,4461 @@
+// CQG Messages that are related to CQG trade routing system (CQG Gateway)
+//
+// Protocol time attributes are 64-bit signed integers (sint64) that contain offset in milliseconds from 01.01.1970 (i.e. unix timestamp).
+//
+// Last changes were made on 17 Sep 2021
+// Version 1.61
+
+syntax = "proto2";
+
+import "common/shared_1.proto";
+import "common/decimal.proto";
+import "CMS/common_1.proto";
+
+package traderouting_1;
+
+////------------------------------------------
+//// Client Messages
+
+// Request related to trade routing.
+// Only one optional field is expected.
+message TradeRoutingRequest
+{
+    // ID of a request.
+    required uint32 id = 1;
+
+    // Request related to trade routing accounts.
+    optional AccountScopeRequest account_scope_request = 2;
+
+    // Request related to trade routing orders.
+    optional OrderScopeRequest order_scope_request = 3;
+
+    // Get a list of related to trade routing lookup properties.
+    // Lookup property types are defined in TradeRoutingLookupPropertyType enum.
+    optional common_1.LookupPropertyListRequest lookup_property_list_request = 4;
+}
+
+// Request related to trade routing accounts.
+// Only one optional field is expected.
+message AccountScopeRequest
+{
+    // Get information about an account.
+    optional AccountInfoRequest account_info_request = 1;
+
+    // Get balance records for an account.
+    optional BalanceRecordsRequest balance_records_request = 2;
+
+    // Create new balance record.
+    optional CreateBalanceRecord create_balance_record = 3;
+
+    // Update existing balance record.
+    optional UpdateBalanceRecord update_balance_record = 4;
+
+    // Get account risk parameters.
+    optional AccountRiskParametersRequest account_risk_parameters_request = 5;
+
+    // Update account's risk parameters.
+    // [obsolete] Use UpdateAccountRiskParameters instead.
+    optional UpdateRiskParameters obsolete_update_risk_parameters = 6 [deprecated = true];
+
+    // Search account information.
+    optional AccountSearchRequest account_search_request = 7;
+
+    // Get enabled account's routes.
+    optional AccountRouteListRequest account_route_list_request = 8;
+
+    // Get account to user authorization list.
+    optional AccountUserAuthorizationListRequest account_user_authorization_list_request = 9;
+
+    // Get account settings.
+    optional AccountSettingsRequest account_settings_request = 10;
+
+    // Get list of exchange groups and commodities that are potentially available for the account.
+    // List of enabled exchange groups and commodities along with other settings is requested by account_market_limits_request.
+    optional AccountAvailableExchangeGroupsRequest account_available_exchange_groups_request = 11;
+
+    // Get account market limits.
+    // Account risk parameters with limits enforcement settings is requested by account_risk_parameters_request.
+    optional AccountMarketLimitsRequest account_market_limits_request = 12;
+
+    // Get account positions data without trades matching.
+    optional AccountPositionsRequest account_positions_request = 13;
+
+    // Get account equity based on most recent statement data.
+    optional AccountEquityRequest account_equity_request = 14;
+
+    // Get current account collateral (margin details).
+    optional AccountCollateralRequest account_collateral_request = 15;
+
+    // Create new account and clone configuration from the existing one.
+    optional CloneAccount clone_account = 16;
+
+    // Update general information of account.
+    optional UpdateAccount update_account = 17;
+
+    // Update specific account settings.
+    optional UpdateAccountSettings update_account_settings = 18;
+
+    // Get account group information.
+    optional AccountGroupRequest account_group_request = 19;
+
+    // Update account risk parameters.
+    optional UpdateAccountRiskParameters update_account_risk_parameters = 20;
+
+    // Request of all routes available for the account.
+    optional AccountAvailableRouteListRequest account_available_route_list_request = 21;
+
+    // Update account routes list.
+    optional UpdateAccountRouteList update_account_route_list = 22;
+
+    // Update account market limits.
+    optional UpdateAccountMarketLimits update_account_market_limits = 23;
+
+    // Create account.
+    optional CreateAccount create_account = 24;
+
+    // [obsolete] This operation is no longer supported.
+    optional AccountClusterRequest obsolete_account_cluster_request = 25 [deprecated = true];
+
+    // [obsolete] This operation is no longer supported.
+    optional CreateAccountCluster obsolete_create_account_cluster = 26 [deprecated = true];
+
+    // [obsolete] This operation is no longer supported.
+    optional UpdateAccountCluster obsolete_update_account_cluster = 27 [deprecated = true];
+
+    // [obsolete] This operation is no longer supported.
+    optional UpdateAccountClusterPriceOffsets obsolete_update_account_cluster_price_offsets = 28 [deprecated = true];
+
+    // Restore account.
+    optional RestoreAccount restore_account = 29;
+
+    // Account type overrides per exchange list.
+    optional AccountTypeOverrideListRequest account_type_override_list_request = 30;
+
+    // Update account type overrides list.
+    optional UpdateAccountTypeOverrideList update_account_type_override_list = 31;
+
+    // Update account to user authorization list.
+    optional UpdateAccountUserAuthorizationList update_account_user_authorization_list = 32;
+
+    // Remove account.
+    optional RemoveAccount remove_account = 33;
+
+    // Gets available to account list of Service Groups according to enabled routes.
+    optional AccountAvailableServiceGroupListRequest account_available_service_group_list_request = 34;
+
+    // Gets account's enabled Service Groups.
+    optional AccountServiceGroupListRequest account_service_group_list_request = 35;
+
+    // Updates list of account's enabled Service Groups.
+    optional UpdateAccountServiceGroupList update_account_service_group_list = 36;
+
+    // Gets billable exchanges available to the current admin login.
+    optional BillableExchangeListRequest billable_exchange_list_request = 37;
+
+    // Creates new account group with master and sub accounts.
+    optional CreateAccountGroup create_account_group = 38;
+
+    // Updates existing account group.
+    optional UpdateAccountGroup update_account_group = 39;
+
+    // Removes existing account group.
+    optional RemoveAccountGroup remove_account_group = 40;
+
+    // Deletes specific positions data or all positions data on specific account.
+    // It only deletes data of statement positions, does not do real positions liquidation on exchange.
+    optional DeleteAccountPositions delete_account_positions = 41;
+}
+
+// Request related to trade routing orders.
+// Only one optional field is expected.
+message OrderScopeRequest
+{
+    // Get order details.
+    optional OrderDetailsRequest order_details_request = 1;
+
+    // Add fill to the existing order.
+    optional AddFill add_fill = 2;
+
+    // Create new external order.
+    optional CreateExternalOrder create_external_order = 3;
+
+    // Search order information.
+    optional OrderSearchRequest order_search_request = 4;
+
+    // Requests tree with related order chains for synthetic or synthetic strategy orders.
+    optional RelatedOrderTreeRequest related_order_tree_request = 5;
+
+    // Compound orders tree.
+    optional CompoundOrderTreeRequest compound_order_tree_request = 6;
+
+    // Order strategy tree, describing synthetic strategy.
+    optional SyntheticStrategyTreeRequest synthetic_strategy_tree_request = 7;
+
+    // Cancel order operation.
+    optional CancelOrder cancel_order = 8;
+
+    // Reflect order as canceled without sending real cancel request to exchange.
+    optional ReflectAsCanceledOrder reflect_as_canceled_order = 9;
+
+    // Cancel whole tree of compound orders.
+    optional CancelCompoundOrderTree cancel_compound_order_tree = 10;
+
+    optional ConfirmOrderSentToExchange confirm_order_sent_to_exchange = 11;
+
+    optional ActivateOrder activate_order = 12;
+
+    optional CorrectFill correct_fill = 13;
+
+    optional CancelFill cancel_fill = 14;
+}
+
+// Order details request message.
+// Get information about an order chain.
+// By default result contains at most DEFAULT_RESULT_RECORDS_NUMBER records.
+// Set parameter order_requests_top to a larger number to receive more.
+message OrderDetailsRequest
+{
+    // ID of the account that was used to place the order.
+    // Mutually exclusive with trade_location_id field.
+    optional sint32 account_id = 1;
+
+    // [required] Server order identifier (one of order ID within order chain).
+    optional string order_id = 2;
+
+    // Trade location.
+    // Mutually exclusive with account_id field.
+    optional string trade_location_id = 3;
+
+    // Optionally restrict order requests in the chain by returning 'top' ones of the last submitted.
+    optional uint32 order_requests_top = 4;
+}
+
+// Add fill message.
+// Fills may only be added to single leg (outright) orders.
+// Server automatically creates an order and matching leg fill.
+message AddFill
+{
+    // Identifier of a trade routing account that is used to add a fill.
+    optional sint32 account_id = 1;
+
+    // [required] Order identifier assigned by server after last modification.
+    optional string order_id = 2;
+
+    // [obsolete] Use quantity field instead.
+    optional uint32 obsolete_quantity = 3 [deprecated = true];
+
+    // [required] Price at which the lots were bought or sold.
+    // Correct price format.
+    // Mutually exclusive with display_price field.
+    optional double price = 4;
+
+    // UTC time of the fill (offset in milliseconds from 01.01.1970).
+    optional sint64 fill_utc_time = 5;
+
+    // Flag that trade was aggressive (Fixed Income specific order modifier; true by default).
+    optional bool is_aggressive = 6;
+
+    // [required] Price of the single fill to apply to the order.
+    // Display price format for the order's contract.
+    // Mutually exclusive with price field.
+    optional sint64 display_price = 7;
+
+    // Order fill open/close type.
+    // This field is associated with OrderChain.OpenCloseType enum type.
+    optional uint32 open_close_type = 8;
+
+    // Order fill speculation type.
+    // This field is associated with OrderChain.SpeculationType enum type.
+    optional uint32 speculation_type = 9;
+
+    // Trade location.
+    optional string trade_location_id = 10;
+
+    // [required] Quantity of bought or sold lots depending on order side.
+    optional cqg.Decimal quantity = 11;
+}
+
+// Create external order and fill message.
+// Only single leg (outright) orders are supported.
+// Server automatically creates an order and matching leg fill.
+message CreateExternalOrder
+{
+    // [required] Account ID.
+    optional sint32 account_id = 1;
+
+    // [required] User ID.
+    optional string user_id = 2;
+
+    // [required] Full contract symbol.
+    optional string contract_symbol = 3;
+
+    // Order side.
+    // [required] This field is associated with OrderChain.Side enum type.
+    optional uint32 side = 4;
+
+    // Order type.
+    // [required] This field is associated with OrderChain.OrderType enum type.
+    optional uint32 order_type = 5;
+
+    // Limit price of the order (required for limit and stop-limit orders).
+    // Correct price format.
+    // Mutually exclusive with display_limit_price field.
+    optional double limit_price = 6;
+
+    // Stop price of the order (required for stop and stop-limit orders).
+    // Correct price format.
+    // Mutually exclusive with display_stop_price field.
+    optional double stop_price = 7;
+
+    // [obsolete] Use fill_quantity field instead.
+    optional uint32 obsolete_fill_quantity = 8 [deprecated = true];
+
+    // [required] Price of the single fill to apply to the order.
+    // CQG correct price format for the order's contract.
+    // Mutually exclusive with display_fill_price field.
+    optional double fill_price = 9;
+
+    // UTC time of the fill.
+    optional sint64 fill_utc_time = 10;
+
+    // Limit price of the order (required for limit and stop-limit orders).
+    // Display price format.
+    // Mutually exclusive with limit_price field.
+    optional sint64 display_limit_price = 11;
+
+    // Stop price of the order (required for stop and stop-limit orders).
+    // Display price format.
+    // Mutually exclusive with stop_price field.
+    optional sint64 display_stop_price = 12;
+
+    // [required] Price of the single fill to apply to the order.
+    // Display price format for the order's contract.
+    // Mutually exclusive with fill_price field.
+    optional sint64 display_fill_price = 13;
+
+    // Order open/close type.
+    // This field is associated with OrderChain.OpenCloseType enum type.
+    optional uint32 open_close_type = 14;
+
+    // Order speculation type.
+    // This field is associated with OrderChain.SpeculationType enum type.
+    optional uint32 speculation_type = 15;
+
+    // Flag that trade was aggressive (null by default).
+    optional bool fill_is_aggressive = 16;
+
+    // [required] Quantity of the single fill to apply to the order.
+    optional cqg.Decimal fill_quantity = 17;
+}
+
+// Order search request message.
+// Server returns a list of found order records.
+// By default result contains at most DEFAULT_RESULT_RECORDS_NUMBER records.
+// Set parameter top to a larger number to receive more.
+message OrderSearchRequest
+{
+    // [obsolete] Text to search.
+    optional string obsolete_text = 1 [deprecated = true];
+
+    // List of possible search refine criteria.
+    enum SearchCriteria
+    {
+        // Search by order id.
+        ORDER_ID = 1;
+
+        // Search by client order ID.
+        CLIENT_ORDER_ID = 2;
+
+        // Search by order ticket number
+        // (order identifier assigned by execution system).
+        TICKET_NUMBER = 3;
+
+        // Search by order contract.
+        CONTRACT = 4;
+
+        // Search by account id.
+        ACCOUNT_ID = 5;
+
+        // Search by account name.
+        ACCOUNT_NAME = 6;
+
+        // Search by brokerage account number.
+        BROKERAGE_NUMBER = 7;
+
+        // Search by user name.
+        USER_NAME = 8;
+
+        // Search by customer last name.
+        CUSTOMER_LAST_NAME = 9;
+
+        // Search by customer first name.
+        CUSTOMER_FIRST_NAME = 10;
+
+        // Search by user id.
+        USER_ID = 11;
+
+        // Search by route order id
+        // (numeric id assigned withing order route).
+        ROUTE_ORDER_ID = 12;
+
+        // Search by route client order id
+        // (route order id transformed to meet execution system format rules).
+        ROUTE_CLIENT_ORDER_ID = 13;
+
+        // Search by order GUID.
+        ORDER_GUID = 14;
+
+        // Fill care order id.
+        FILL_CARE_ORDER_ID = 15;
+
+        // Chain order id.
+        CHAIN_ORDER_ID = 16;
+
+        // Search by sales series number.
+        SALES_SERIES_NUMBER = 17;
+
+        // Search by sales series name.
+        SALES_SERIES_NAME = 18;
+
+        // Search by sales series ID.
+        // Use PROFILE_SALES_SERIES_ID instead.
+        SALES_SERIES_ID = 19;
+
+        // Search by exchange name.
+        EXCHANGE_NAME = 20;
+
+        // Search by route code.
+        ROUTE_CODE = 21;
+
+        // Search by route name.
+        ROUTE_NAME = 22;
+
+        // Search by profile sales series ID.
+        PROFILE_SALES_SERIES_ID = 23;
+    }
+
+    // [obsolete] List of search options.
+    // This field is associated with SearchCriteria enum type.
+    // Empty list means search by any possible options.
+    repeated uint32 obsolete_search_criteria = 2 [deprecated = true];
+
+    // optionally restrict matched results by returning the first 'top' records.
+    optional uint32 top = 3;
+
+    // Trade location.
+    optional string trade_location_id = 4;
+
+    // Archived orders only.
+    optional bool archived = 5;
+
+    // List of search options. Each option has its own search text, criteria and matching rule.
+    repeated common_1.SearchOption search_options = 6;
+
+    // Indicates, whether all criteria must match at once.
+    // By default any criteria must match.
+    optional bool all_match_mode = 7 [default = false];
+}
+
+// Requests tree with related order chains for synthetic or synthetic strategy orders.
+// By default result contains at most DEFAULT_RESULT_RECORDS_NUMBER records.
+// Set parameter order_requests_top to a larger number to receive more.
+message RelatedOrderTreeRequest
+{
+    // [required] Identifier of any order chain in a tree.
+    optional string chain_order_id = 1;
+
+    // Trade location.
+    optional string trade_location_id = 2;
+
+    // Optionally restrict order requests in the chains by returning 'top' ones of the last submitted.
+    optional uint32 order_requests_top = 3;
+
+    // Optionally restrict matched results by returning the first 'top' records (sorted by leg path).
+    optional uint32 top = 4;
+}
+
+// Compound orders tree.
+// By default result contains at most DEFAULT_RESULT_RECORDS_NUMBER records.
+// Set parameter order_requests_top/top to a larger number to receive more.
+message CompoundOrderTreeRequest
+{
+    // [required] Identifier of compound tree.
+    optional string compound_tree_id = 1;
+
+    // Trade location.
+    optional string trade_location_id = 2;
+
+    // Optionally restrict order requests in the chains by returning 'top' ones of the last submitted.
+    optional uint32 order_requests_top = 3;
+
+    // optionally restrict matched results by returning the first 'top' records.
+    optional uint32 top = 4;
+}
+
+// Order strategy tree, describing synthetic strategy.
+message SyntheticStrategyTreeRequest
+{
+    // [required] Identifier of root synthetic strategy order chain.
+    optional string root_chain_order_id = 1;
+
+    // Trade location.
+    optional string trade_location_id = 2;
+}
+
+// Cancel order operation.
+message CancelOrder
+{
+    // [required] Chain order identifier.
+    optional string chain_order_id = 1;
+
+    // ID of the account that was used to place the order.
+    // Mutually exclusive with trade_location_id field.
+    optional sint32 account_id = 2;
+
+    // Trade location.
+    // Mutually exclusive with account_id field.
+    optional string trade_location_id = 3;
+}
+
+// Reflect order as canceled without sending real cancel request to exchange.
+message ReflectAsCanceledOrder
+{
+    // [required] Chain order identifier.
+    optional string chain_order_id = 1;
+
+    // ID of the account that was used to place the order.
+    // Mutually exclusive with trade_location_id field.
+    optional sint32 account_id = 2;
+
+    // Trade location.
+    // Mutually exclusive with account_id field.
+    optional string trade_location_id = 3;
+}
+
+// Cancel whole tree of compound orders.
+message CancelCompoundOrderTree
+{
+    // [required] Compound tree identifier.
+    optional string compound_tree_id = 1;
+
+    // ID of the account that was used to place the tree.
+    // Mutually exclusive with trade_location_id field.
+    optional sint32 account_id = 2;
+
+    // Trade location.
+    // Mutually exclusive with account_id field.
+    optional string trade_location_id = 3;
+}
+
+message ConfirmOrderSentToExchange
+{
+    // [required] Chain order identifier.
+    optional string chain_order_id = 1;
+
+    // ID of the account that was used to place the order.
+    // Mutually exclusive with trade_location_id field.
+    optional string account_id = 2;
+
+    // Trade location.
+    // Mutually exclusive with account_id field.
+    optional string trade_location_id = 3;
+
+    // [required] New route order id.
+    optional string new_route_order_id = 4;
+}
+
+message ActivateOrder
+{
+    // [required] Chain order identifier.
+    optional string chain_order_id = 1;
+
+    // ID of the account that was used to place the order.
+    // Mutually exclusive with trade_location_id field.
+    optional string account_id = 2;
+
+    // Trade location.
+    // Mutually exclusive with account_id field.
+    optional string trade_location_id = 3;
+}
+
+message CorrectFill
+{
+    enum FillType
+    {
+        FILL_TYPE_ORDER_FILL = 1;
+        FILL_TYPE_LEG_FILL = 2;
+    }
+
+    // [required] Trade routing order fill/leg fill unique identifier.
+    optional string id = 1;
+
+    // [required] Associated with CorrectFill.FillType enum.
+    // If ommited, FILL_TYPE_ORDER_FILL type is used.
+    optional uint32 fill_type = 2;
+
+    // ID of the account that was used to place the order.
+    optional string account_id = 3;
+
+    // Trade location.
+    // Mutually exclusive with account_id field.
+    optional string trade_location_id = 4;
+
+    // [required] Quantity of bought or sold lots depending on order side.
+    optional cqg.Decimal quantity = 5;
+
+    // [required] Price of the single fill to apply to the order.
+    // Display price format for the order's contract.
+    optional sint64 display_price = 6;
+}
+
+message CancelFill
+{
+    // [required] Trade routing order fill/leg fill unique identifier.
+    optional string id = 1;
+
+    // [required] Associated with CorrectFill.FillType enum.
+    // If ommited, FILL_TYPE_ORDER_FILL type is used.
+    optional uint32 fill_type = 2;
+
+    // ID of the account that was used to place the order.
+    optional string account_id = 3;
+
+    // Trade location.
+    // Mutually exclusive with account_id field.
+    optional string trade_location_id = 4;
+
+    // Busting a fill means that the quantity remaining on the order will not be adjusted.
+    // For example, on an order for 5 with 2 fills busting the fills keeps the quantity remaining at 3 instead of restoring it to 5.
+    // In case of fill_type = FILL_TYPE_FILL_LEG, bust mode is always used.
+    optional bool bust = 5;
+}
+
+// Account information request message.
+// Server returns matching account if exactly one account matches supplied criteria.
+message AccountInfoRequest
+{
+    // Trade routing account identifier.
+    // If supplied, brokerage_account_number should not be supplied.
+    optional sint32 account_id = 1;
+
+    // Brokerage account number.
+    // If supplied, account_id should not be supplied.
+    optional string brokerage_account_number = 2;
+}
+
+// Balance records request message.
+// Server returns balance records that matches supplied criteria.
+message BalanceRecordsRequest
+{
+    // [required] Gateway account identifier.
+    // If supplied, balance_id should not be supplied.
+    optional sint32 account_id = 1;
+
+    // Currency code (real currency code is ISO 4217 based.
+    // If supplied, only balance records of this currency are returned.
+    // Can be supplied only with account_id.
+    optional string currency = 2;
+
+    // Trade routing balance identifier.
+    // If supplied, only the balance record with this ID is returned.
+    // If supplied, account_id and currency should not be supplied.
+    optional sint32 balance_id = 3;
+}
+
+// Create balance record message.
+// Add a new balance record for the specified account.
+message CreateBalanceRecord
+{
+    // [required] Trade routing account identifier.
+    optional sint32 account_id = 1;
+
+    // [required] Currency code (real currency code is ISO 4217 based.
+    optional string currency = 2;
+
+    // [required] End cash balance.
+    optional double end_cash_balance = 3;
+
+    // Cash value of collateral.
+    optional double collateral = 4;
+
+    // Regulated.
+    optional bool regulated = 5 [default = true];
+
+    // Statement date, could be present or future (UTC).
+    // Datetime format is used but only date part is used, time part is ignored.
+    optional sint64 as_of_date = 6;
+}
+
+// Update balance record message.
+message UpdateBalanceRecord
+{
+    // [required] Trade routing balance record identifier.
+    required sint32 balance_id = 1;
+
+    // End cash balance.
+    optional double end_cash_balance = 2;
+
+    // Cash value of collateral.
+    // If not supplied, any existing collateral value is not changed.
+    optional double collateral = 3;
+}
+
+// Account search request message.
+// Server returns a list of found account records.
+// By default result contains at most DEFAULT_RESULT_RECORDS_NUMBER records.
+message AccountSearchRequest
+{
+    // [obsolete] Text to search.
+    optional string obsolete_text = 1 [deprecated = true];
+
+    enum AccountGroupRole
+    {
+        MASTER = 2;
+        SUB = 3;
+    }
+
+    // List of possible search refine criteria.
+    enum SearchCriteria
+    {
+        // Search by account id.
+        ACCOUNT_ID = 1;
+
+        // Search by account name.
+        ACCOUNT_NAME = 2;
+
+        // Search by brokerage account number.
+        BROKERAGE_NUMBER = 3;
+
+        // Search by profile sales series number.
+        PROFILE_SALES_SERIES_NUMBER = 4;
+
+        // Search by profile sales series name.
+        PROFILE_SALES_SERIES_NAME = 5;
+
+        // Search by sales series ID.
+        // Use PROFILE_SALES_SERIES_ID instead.
+        SALES_SERIES_ID = 6;
+
+        // Search by customer ID.
+        // Use PROFILE_ID instead.
+        CUSTOMER_ID = 7;
+
+        // Search by profile name.
+        PROFILE_NAME = 8;
+
+        // [obsolete] Search by account cluster.
+        // This criteria is no longer supported.
+        OBSOLETE_ACCOUNT_CLUSTER_ID = 9;
+
+        // LIMITED USE: Only explicitly, one per search option with EXACT_EQUALITY rule and in all match mode.
+        RISK_SERVER_INSTANCE_ID = 10;
+
+        ACCOUNT_GROUP_ID = 11;
+
+        // This field is associated with AccountSearchRequest.AccountGroupRole enum type.
+        // LIMITED USE: Only explicitly, one per search option with EXACT_EQUALITY rule and in all match mode.
+        ACCOUNT_GROUP_ROLE = 12;
+
+        BROKERAGE_ID = 13;
+
+        // This field is associated with Account.Class enum type.
+        // LIMITED USE: Only explicitly, one per search option with EXACT_EQUALITY rule and in all match mode.
+        ACCOUNT_CLASS = 14;
+
+        // Can be 0 (false) or 1 (true).
+        // LIMITED USE: Only explicitly, one per search option with EXACT_EQUALITY rule and in all match mode.
+        IS_COLLECTION = 15;
+
+        // Can be 0 (false) or 1 (true).
+        // LIMITED USE: Only explicitly, one per search option with EXACT_EQUALITY rule and in all match mode.
+        IS_IN_ACCOUNT_GROUP = 16;
+
+        // Search by profile (customer/admin) ID.
+        PROFILE_ID = 17;
+
+        // Search by profile sales series ID.
+        PROFILE_SALES_SERIES_ID = 18;
+    }
+
+    // [obsolete] List of search options.
+    // This field is associated with SearchCriteria enum type.
+    // Empty list means search by any possible options.
+    repeated uint32 obsolete_search_criteria = 2 [deprecated = true];
+
+    // Optionally restrict matched results by returning the first 'top' records.
+    optional uint32 top = 3;
+
+    // Determines whether removed entities are included in search result.
+    // For clients that use protocol version under 1.19 it is 'true' by default.
+    optional bool include_removed = 4 [default = false];
+
+    // List of search options. Each option has its own search text, criteria and matching rule.
+    repeated common_1.SearchOption search_options = 5;
+
+    // Indicates, whether all criteria must match at once.
+    // By default any criteria must match.
+    optional bool all_match_mode = 6 [default = false];
+}
+
+// Get list of routes enabled for the account.
+message AccountRouteListRequest
+{
+    // Account ID to get list of routes.
+    required sint32 account_id = 1;
+}
+
+// Account to user authorization list request message.
+// Either account_id (to request a list of users for an account)
+// or user_id (to request a list or accounts for a user) is expected.
+message AccountUserAuthorizationListRequest
+{
+    // Account ID.
+    optional sint32 account_id = 1;
+
+    // User ID.
+    optional string user_id = 2;
+
+    // optionally restrict results by returning the first 'top' records.
+    optional uint32 top = 3;
+
+    // Includes also implicit authorization (via brokerage or sales series direct authority).
+    optional bool include_implicit_authorization = 4;
+}
+
+// Account settings request message.
+message AccountSettingsRequest
+{
+    // Account ID to get account settings.
+    required sint32 account_id = 1;
+}
+
+// Account risk parameters request message.
+message AccountRiskParametersRequest
+{
+    // Account ID to get risk parameters.
+    required sint32 account_id = 1;
+}
+
+// Update account risk parameters message.
+// [obsolete] Use UpdateAccountRiskParameters instead.
+message UpdateRiskParameters
+{
+    // Trade routing account identifier.
+    required sint32 account_id = 1;
+
+    // Allow positions to be closed only.
+    optional bool liquidation_only = 2;
+
+    // Allow futures trading.
+    optional bool allow_futures = 3;
+
+    // Allow options trading.
+    // The value is associated with AccountRiskParameters.OptionsTrading enum.
+    optional uint32 allow_options = 4;
+
+    // Additional credit available to satisfy margin requirements.
+    // Can be set only if Margin Subsystem is enabled for the account.
+    optional double allowable_margin_credit = 5;
+}
+
+// Account potentially available exchange groups and commodities request message.
+message AccountAvailableExchangeGroupsRequest
+{
+    // Account ID to get exchange groups.
+    required sint32 account_id = 1;
+}
+
+// Account market limits request message.
+message AccountMarketLimitsRequest
+{
+    // Account ID to get limits.
+    required sint32 account_id = 1;
+}
+
+// Account positions request message.
+message AccountPositionsRequest
+{
+    // [required] Account ID to get positions.
+    optional sint32 account_id = 1;
+
+    // Group positions by contract or fungible contract.
+    // By default grouping is by fungible contract.
+    optional bool group_by_contract = 2;
+}
+
+// Account equity request message.
+message AccountEquityRequest
+{
+    // Account ID.
+    required sint32 account_id = 1;
+
+    // Currency code of requested equity values (ISO 4217 based).
+    // Defaults to account’s currency if omitted.
+    optional string currency = 2;
+}
+
+// Account collateral request message.
+message AccountCollateralRequest
+{
+    // Account ID.
+    required sint32 account_id = 1;
+}
+
+// Clone account message.
+// Information that is cloned:
+// - account customer (if new_account_user_id is not provided);
+// - account settings;
+// - account routing options;
+// - account risk parameters;
+// - account market limits and allowable markets;
+// - list of authorized traders.
+message CloneAccount
+{
+    // Account which configuration will be copied.
+    required sint32 source_account_id = 1;
+
+    // Name of the new account (max length = 64).
+    required string new_account_name = 2;
+
+    // Brokerage number of the new account (max length = 12).
+    required string new_account_brokerage_number = 3;
+
+    // ID of a user (trader) which customer is used for the new account.
+    // This user will be authorized on the new account.
+    // If not specified then the source account customer will be used.
+    optional string new_account_user_id = 4;
+}
+
+// Updates general information of account.
+message UpdateAccount
+{
+    // [required] Account information to update.
+    // Only fields for update must be provided.
+    // Fields that cannot be changed with this update message (see fields comments) are ignored.
+    optional Account account = 1;
+
+    // [obsolete] Use only account field instead.
+    optional Account obsolete_original_account = 2 [deprecated = true];
+}
+
+// [obsolete] Requests account cluster by its identifier.
+message AccountClusterRequest
+{
+    // [required] Account cluster id.
+    optional string account_cluster_id = 1;
+}
+
+// [obsolete] Creates account cluster.
+message CreateAccountCluster
+{
+    // [required] Account cluster to create.
+    optional AccountCluster obsolete_account_cluster = 1 [deprecated = true];
+}
+
+// [obsolete] Updates account cluster.
+message UpdateAccountCluster
+{
+    // [required] Account cluster to update.
+    optional AccountCluster obsolete_account_cluster = 1 [deprecated = true];
+
+    // Original account cluster information.
+    // When provided, only fields that are different from the original account cluster are changed;
+    // otherwise account cluster is applied as provided in account cluster fields.
+    optional AccountCluster obsolete_original_account_cluster = 2 [deprecated = true];
+}
+
+// [obsolete] Updates account cluster price offsets.
+message UpdateAccountClusterPriceOffsets
+{
+    // [required] Account cluster id.
+    optional string account_cluster_id = 1;
+
+    // Price offsets to create or update.
+    // Price offsets will be created if they do not exist or updated otherwise.
+    repeated AccountClusterPriceOffset offsets_to_set = 2;
+
+    // Price offsets to remove.
+    repeated AccountClusterPriceOffset offsets_to_remove = 3;
+}
+
+message UpdateAccountSettings
+{
+    // Account settings to update.
+    // Only fields for update must be provided.
+    optional AccountSettings settings = 1;
+
+    // [obsolete] Use only settings field instead.
+    optional AccountSettings obsolete_original_settings = 2 [deprecated = true];
+}
+
+message AccountGroupRequest
+{
+    // Account id to get group information for, if it is related to any.
+    // Mutually exclusive with account_group_id field.
+    optional string account_id = 1;
+
+    // Account group id.
+    // Mutually exclusive with account_id field.
+    optional string account_group_id = 2;
+}
+
+// Update risk parameters.
+message UpdateAccountRiskParameters
+{
+    // [required] Account id.
+    // Must be provided instead of risk_parameters.obsolete_account_id.
+    optional string account_id = 3;
+
+    // [required] Risk parameters to update.
+    // Only fields for update must be provided.
+    optional RiskParameters risk_parameters = 1;
+
+    // [obsolete] Use only risk_parameters field instead.
+    optional RiskParameters obsolete_original_risk_parameters = 2 [deprecated = true];
+}
+
+// Update account route list.
+message UpdateAccountRouteList
+{
+    // [required] Account id to update routes.
+    optional string account_id = 1;
+
+    // Routes to add or change.
+    repeated AccountRouteRecord routes_to_set = 2;
+
+    // Route codes to remove from account.
+    repeated string route_codes_to_remove = 3;
+}
+
+// Update account market limits.
+// How to use this message:
+// - only provided data is updated - records/levels (like exchange, commodity..)
+//   and limits inside of them are not changed if not provided explicitly;
+// - if you want to clear (set to default) group of limits (entire level, exchange, commodity..),
+//   including trading authority (allowed_trade) you can use cleared_fields of corresponding message.
+message UpdateAccountMarketLimits
+{
+    // [required] account id to update market limits.
+    optional string account_id = 1;
+
+    // [required] market limits to update.
+    // Only fields for update must be provided.
+    optional MarketLimits market_limits = 2;
+
+    // [obsolete] Use only market_limits field instead.
+    optional MarketLimits obsolete_original_market_limits = 3 [deprecated = true];
+}
+
+// Request of all routes available for the account.
+message AccountAvailableRouteListRequest
+{
+    // [required] Account identifier.
+    optional string account_id = 1;
+}
+
+// Creates a new GW Account.
+message CreateAccount
+{
+    // [required] Account to create.
+    optional Account account = 1;
+}
+
+////------------------------------------------
+//// Server Messages
+
+// Result of TradeRoutingRequest.
+message TradeRoutingResult
+{
+    // ID of a corresponding request.
+    required uint32 request_id = 1;
+
+    // Operation status.
+    // This field is associated with OperationStatus enum.
+    required uint32 operation_status = 2;
+
+    // Error details if operation failed.
+    optional shared_1.Text error_message = 3;
+
+    // Result of accounts related request.
+    optional AccountScopeResult account_scope_result = 4;
+
+    // Result of orders related request.
+    optional OrderScopeResult order_scope_result = 5;
+
+    // Result of lookup_property_list_request.
+    optional common_1.LookupPropertyListResult lookup_property_list_result = 6;
+
+    // Request tracking number generated by CMS API
+    // Used by client to cancel deferred request
+    optional uint64 tracking_number = 7;
+}
+
+// Result of accounts related request.
+message AccountScopeResult
+{
+    // Result of account information request.
+    optional AccountInfoResult account_info_result = 1;
+
+    // Result of balance records request.
+    optional BalanceRecordsResult balance_records_result = 2;
+
+    // Result of balance record creation.
+    optional CreateBalanceRecordResult create_balance_record_result = 3;
+
+    // Result of balance record update.
+    optional UpdateBalanceRecordResult update_balance_record_result = 4;
+
+    // Result of account risk parameters request.
+    optional AccountRiskParametersResult account_risk_parameters_result = 5;
+
+    // Result of account's risk parameters update.
+    optional UpdateRiskParametersResult update_risk_parameters_result = 6;
+
+    // Result of account search request.
+    optional AccountSearchResult account_search_result = 7;
+
+    // Result of account routes list request.
+    optional AccountRouteListResult account_route_list_result = 8;
+
+    // Result of account to user authorization list request.
+    optional AccountUserAuthorizationListResult account_user_authorization_list_result = 9;
+
+    // Result of account settings request.
+    optional AccountSettingsResult account_settings_result = 10;
+
+    // Result of AccountAvailableExchangeGroupsRequest.
+    optional AccountExchangeGroupsResult account_exchange_groups_result = 11;
+
+    // Result of account market limits request.
+    optional AccountMarketLimitsResult account_market_limits_result = 12;
+
+    // Result of positions request.
+    optional AccountPositionsResult account_positions_result = 13;
+
+    // Result of equity request.
+    optional AccountEquityResult account_equity_result = 14;
+
+    // Result of collateral request.
+    optional AccountCollateralResult account_collateral_result = 15;
+
+    // Result of clone account request.
+    optional CloneAccountResult clone_account_result = 16;
+
+    // Result of UpdateAccount.
+    optional UpdateAccountResult update_account_result = 17;
+
+    // Result of UpdateAccountSettings.
+    optional UpdateAccountSettingsResult update_account_settings_result = 18;
+
+    // Result of AccountGroupRequest.
+    optional AccountGroupResult account_group_result = 19;
+
+    // Result of UpdateAccountRiskParameters.
+    optional UpdateAccountRiskParametersResult update_account_risk_parameters_result = 20;
+
+    // Result of AccountAvailableRouteListRequest.
+    optional AccountAvailableRouteListResult account_available_route_list_result = 21;
+
+    // Result of UpdateAccountRouteList.
+    optional UpdateAccountRouteListResult update_account_route_list_result = 22;
+
+    // Result of UpdateAccountMarketLimits.
+    optional UpdateAccountMarketLimitsResult update_account_market_limits_result = 23;
+
+    // Result of CreateAccount.
+    optional CreateAccountResult create_account_result = 24;
+
+    // [obsolete] This operation is no longer supported.
+    optional AccountClusterResult obsolete_account_cluster_result = 25 [deprecated = true];
+
+    // [obsolete] This operation is no longer supported.
+    optional CreateAccountClusterResult obsolete_create_account_cluster_result = 26 [deprecated = true];
+
+    // [obsolete] This operation is no longer supported.
+    optional UpdateAccountClusterResult obsolete_update_account_cluster_result = 27 [deprecated = true];
+
+    // [obsolete] This operation is no longer supported.
+    optional UpdateAccountClusterPriceOffsetsResult obsolete_update_account_cluster_price_offsets_result = 28 [deprecated = true];
+
+    // Result of RestoreAccount.
+    optional RestoreAccountResult restore_account_result = 29;
+
+    // Result of AccountTypeOverrideListRequest.
+    optional AccountTypeOverrideListResult account_type_override_list_result = 30;
+
+    // Result of UpdateAccountTypeOverrideList.
+    optional UpdateAccountTypeOverrideListResult update_account_type_override_list_result = 31;
+
+    // Result of UpdateAccountUserAuthorizationList.
+    optional UpdateAccountUserAuthorizationListResult update_account_user_authorization_list_result = 32;
+
+    // Result of RemoveAccount.
+    optional RemoveAccountResult remove_account_result = 33;
+
+    // Result of AccountAvailableServiceGroupListRequest.
+    optional AccountAvailableServiceGroupListResult account_available_service_group_list_result = 34;
+
+    // Result of AccountServiceGroupListRequest.
+    optional AccountServiceGroupListResult account_service_group_list_result = 35;
+
+    // Result of UpdateAccountServiceGroupList.
+    optional UpdateAccountServiceGroupListResult update_account_service_group_list_result = 36;
+
+    // Result of BillableExchangeListRequest.
+    optional BillableExchangeListResult billable_exchange_list_result = 37;
+
+    // Result of CreateAccountGroup.
+    optional CreateAccountGroupResult create_account_group_result = 38;
+}
+
+// Result of orders related request.
+message OrderScopeResult
+{
+    // Result of order details request.
+    optional OrderDetailsResult order_details_result = 1;
+
+    // Result of fill adding.
+    optional AddFillResult add_fill_result = 2;
+
+    // Result of external order creation.
+    optional CreateExternalOrderResult create_external_order_result = 3;
+
+    // Result of order search request.
+    optional OrderSearchResult order_search_result = 4;
+
+    // Result of RelatedOrderTreeRequest.
+    optional RelatedOrderTreeResult related_order_tree_result = 5;
+
+    // Result of CompoundOrderTreeRequest.
+    optional CompoundOrderTreeResult compound_order_tree_result = 6;
+
+    // Result of SyntheticStrategyTreeRequest.
+    optional SyntheticStrategyTreeResult synthetic_strategy_tree_result = 7;
+
+    // Result of CancelOrder.
+    optional CancelOrderResult cancel_order_result = 8;
+
+    // Result of ReflectAsCanceledOrder.
+    optional ReflectAsCanceledOrderResult reflect_as_canceled_order_result = 9;
+
+    // Result of CancelCompoundOrderTreeRequest.
+    optional CancelCompoundOrderTreeResult cancel_compound_order_tree_result = 10;
+}
+
+// Order details request result message.
+message OrderDetailsResult
+{
+    // Trade routing order chain.
+    required OrderChain order_chain = 1;
+
+    // This flag is set to true if all order requests in the chain are sent.
+    optional bool is_complete = 2 [default = true];
+}
+
+// Add fill result message.
+message AddFillResult
+{
+}
+
+// Create order result message.
+message CreateExternalOrderResult
+{
+    // [required] Chain order ID of created order.
+    optional string order_id = 3;
+
+    // [required] Trade location of newly created order.
+    optional string trade_location_id = 4;
+}
+
+// Order search request message.
+message OrderSearchResult
+{
+    // List of found orders.
+    repeated OrderSearchResultRecord order_record = 1;
+
+    // This flag is set to true if all search results are sent
+    // and nothing was filtered out by 'top' parameter.
+    optional bool is_complete = 2 [default = true];
+}
+
+// Result of RelatedOrderTreeRequest.
+message RelatedOrderTreeResult
+{
+    // Root order with children.
+    optional RelatedOrder related_order = 1;
+
+    // This flag is set to true if all orders in the tree are sent.
+    optional bool is_complete = 2 [default = true];
+}
+
+// Result of CompoundOrderTreeRequest.
+message CompoundOrderTreeResult
+{
+    // Root compound order with children.
+    optional CompoundOrder compound_order = 1;
+
+    // This flag is set to true if all orders in the tree are sent.
+    optional bool is_complete = 2 [default = true];
+}
+
+// Result of SyntheticStrategyTreeRequest.
+message SyntheticStrategyTreeResult
+{
+    // First level strategy order legs.
+    repeated StrategyLeg legs = 1;
+
+    // Strategy contract name.
+    optional string strategy_name = 2;
+}
+
+// Result of CancelOrder.
+message CancelOrderResult
+{
+}
+
+// Result of ReflectAsCanceledOrder
+message ReflectAsCanceledOrderResult
+{
+}
+
+// Result of CancelCompoundOrderTreeRequest.
+message CancelCompoundOrderTreeResult
+{
+}
+
+// Account information request result message.
+message AccountInfoResult
+{
+    // Trade routing account.
+    required Account account = 1;
+}
+
+// Balance records request result message.
+message BalanceRecordsResult
+{
+    // Balance records.
+    repeated BalanceRecord balance_record = 1;
+}
+
+// Create balance record result message.
+message CreateBalanceRecordResult
+{
+    // Created account balance record id.
+    required sint32 balance_record_id = 3;
+}
+
+// Update balance record result message.
+message UpdateBalanceRecordResult
+{
+}
+
+// Account search result message.
+message AccountSearchResult
+{
+    // List of found accounts.
+    repeated AccountSearchResultRecord account_record = 1;
+
+    // This flag is set to true if all results are sent
+    // and nothing was filtered out by 'top' parameter.
+    optional bool is_complete = 2 [default = true];
+}
+
+// Account routes result message.
+message AccountRouteListResult
+{
+    // List of enabled account routes.
+    repeated AccountRouteRecord account_route_record = 1;
+}
+
+// Account to user authorization list result message.
+message AccountUserAuthorizationListResult
+{
+    // list of account to user authorization links.
+    repeated AccountUserLink account_user_link = 1;
+
+    // This flag is set to true if all results are sent
+    // and nothing was filtered out by 'top' parameter.
+    optional bool is_complete = 2 [default = true];
+}
+
+// Account settings result message.
+message AccountSettingsResult
+{
+    // Account settings.
+    required AccountSettings account_settings = 1;
+}
+
+// Account risk parameters result message.
+message AccountRiskParametersResult
+{
+    // Account risk parameters.
+    optional RiskParameters account_risk_parameters = 1;
+}
+
+// Update account's risk parameters result message.
+message UpdateRiskParametersResult
+{
+}
+
+// Account exchange groups result message.
+message AccountExchangeGroupsResult
+{
+    // List of exchange groups available for the account.
+    repeated ExchangeGroup exchange_group = 1;
+
+    // Dictionary of instrument types that are used in the exchange group's commodities above.
+    repeated InstrumentType instrument_type = 2;
+}
+
+// Account market limits result message.
+message AccountMarketLimitsResult
+{
+    // Account market limits.
+    required MarketLimits account_market_limits = 1;
+}
+
+// Account positions result message.
+message AccountPositionsResult
+{
+    // Account per contract positions.
+    // If some contract has both long and short positions then there are two separate records for
+    // this contract.
+    repeated ContractPosition contract_position = 1;
+}
+
+// Account equity result message.
+message AccountEquityResult
+{
+    // Account equity.
+    required Equity equity = 1;
+}
+
+// Account collateral result message.
+message AccountCollateralResult
+{
+    // Account collateral.
+    required Collateral collateral = 1;
+}
+
+// Clone account result message.
+message CloneAccountResult
+{
+    // ID of the newly created account.
+    required sint32 new_account_id = 1;
+}
+
+// Result of account general information update.
+message UpdateAccountResult
+{
+    // If message is received then account was updated successfully.
+}
+
+// Result of account settings update.
+message UpdateAccountSettingsResult
+{
+    // If message is received then settings were updated successfully.
+}
+
+// Result of AccountGroupRequest.
+message AccountGroupResult
+{
+    // If provided account is not related to any group then empty.
+    optional AccountGroup acount_group = 1;
+}
+
+// Result of UpdateAccountRiskParameters.
+message UpdateAccountRiskParametersResult
+{
+    // If message is received then parameters were updated successfully.
+}
+
+// Result of AccountAvailableRouteListRequest.
+message AccountAvailableRouteListResult
+{
+    // List of available routes.
+    repeated AvailableRoute routes = 1;
+}
+
+// Result of UpdateAccountRouteList.
+message UpdateAccountRouteListResult
+{
+    // If message is received then routes were updated successfully.
+}
+
+// Result of UpdateAccountMarketLimits.
+message UpdateAccountMarketLimitsResult
+{
+    // If message is received then limits were updated successfully.
+}
+
+// Result of CreateAccount.
+message CreateAccountResult
+{
+    // Id of newly created account, if succeeded.
+    optional string id = 1;
+}
+
+// [obsolete] Result of account cluster request.
+message AccountClusterResult
+{
+    // Account cluster.
+    optional AccountCluster obsolete_account_cluster = 1 [deprecated = true];
+
+    // Account cluster price offsets.
+    repeated AccountClusterPriceOffset obsolete_account_cluster_price_offsets = 2 [deprecated = true];
+}
+
+// [obsolete] Result of account cluster creation.
+message CreateAccountClusterResult
+{
+    // Id of newly created account cluster if succeeded.
+    optional string id = 1;
+}
+
+// [obsolete] Result of account cluster update.
+message UpdateAccountClusterResult
+{
+    // If message is received then update is successful.
+}
+
+// [obsolete] Result of account cluster price offsets update.
+message UpdateAccountClusterPriceOffsetsResult
+{
+    // If message is received then update is successful.
+}
+
+////------------------------------------------
+//// Common Messages
+
+// Trade routing order chain.
+// Order chain attributes reflect current order chain status.
+message OrderChain
+{
+     // Order side enum.
+    enum Side
+    {
+        // Describes purchasing side of a trade.
+        BUY = 1;
+
+        // Describes selling side of a trade.
+        SELL = 2;
+    }
+
+    // Order type enum.
+    enum OrderType
+    {
+        // Market order, buy or sell at the best available opposite price.
+        MKT = 1;
+
+        // Limit order, buy or sell at price that is the same or better than specified limit price.
+        LMT = 2;
+
+        // Stop order, order becomes a market order when market reaches order's stop price.
+        // (which is on opposite side of market).
+        STP = 3;
+
+        // Stop-limit order, order becomes a limit order when market reaches order's stop price.
+        STL = 4;
+
+        // Cross order, prearranged trades with either a counterparty within the trading firm itself
+        // or with a specified counterparty outside the firm. These orders are executed on exchange.
+        CROSS = 5;
+    }
+
+    // Order execution instruction.
+    enum ExecInstruction
+    {
+        // All or None (fill order only completely).
+        AON = 1;
+
+        // Iceberg (show only part of order size).
+        ICEBERG = 2;
+
+        // Quantity triggered (aka DOM Triggered, honor additional quantity threshold for triggering).
+        QT = 3;
+
+        // Trailing order (price of the order is following market one direction by specific offset).
+        TRAIL = 4;
+
+        // Funari (Limit order becomes a Market on Close).
+        FUNARI = 5;
+
+        // Market if Touched (Limit order becomes a Market when market reaches order's limit price).
+        MIT = 6;
+
+        // Market Limit Market is a limit order that is used to place a buy order above the best offer
+        // to fill by the best offer or a sell order below the best bid to fill by the best bid.
+        MLM = 7;
+
+        // Market with Leftover as Limit
+        // (market order then unexecuted quantity becomes limit order at last price).
+        MTL = 8;
+
+        // An auction order is an order to buy or sell in the market at the Calculated Opening Price (COP)
+        // (Unmatched auction orders are converted to limit orders on the market open).
+        AUCTION = 9;
+
+        // Post Only Orders are only accepted as passive limit orders.
+        POSTONLY = 10;
+
+        // The order includes a discretionary offset.
+        DISCRETION = 11;
+    }
+
+    // Order duration.
+    enum Duration
+    {
+        // Day order. Order is working through the current trading day only.
+        DAY = 1;
+
+        // Good Til Canceled. Order is working until canceled or until the contract is no longer available for trading.
+        GTC = 2;
+
+        // Good Til Date. Order is working until the end of the nearest trading day for the contract on
+        // or before the date specified in the order.
+        GTD = 3;
+
+        // Good Til Time. Order is working until the specified time.
+        GTT = 4;
+
+        // Fill and Kill. Immediately fill as many as possible and cancel the rest.
+        FAK = 5;
+
+        // Fill Or Kill. Immediately fill this order completely or cancel.
+        FOK = 6;
+
+        // At The Open. Buy or sell at the very beginning of the trading day.
+        ATO = 7;
+
+        // At The Close. Buy or sell at the close of the market, or as near to the closing price as possible.
+        ATC = 8;
+    }
+
+    // Current order chain status.
+    enum Status
+    {
+        // This status is used for internal Gateway transactions.
+        UNDEFINED = 0;
+
+        // Original order is sent to execution system.
+        IN_TRANSIT = 1;
+
+        // Order is rejected.
+        REJECTED = 2;
+
+        // Order is acknowledged by execution and perhaps partially filled.
+        WORKING = 3;
+
+        // Order is expired.
+        EXPIRED = 4;
+
+        // Cancel request is sent to execution system.
+        IN_CANCEL = 5;
+
+        // Modify request is sent to execution system.
+        IN_MODIFY = 6;
+
+        // Order is canceled.
+        CANCELLED = 7;
+
+        // Order is completely filled by execution system.
+        FILLED = 8;
+
+        // Order is waiting submission to execution system.
+        SUSPENDED = 9;
+
+        // Order may be canceled because a disconnection occurred.
+        DISCONNECTED = 10;
+
+        // Order will be placed at a specified time (waiting for execution system to start accepting orders).
+        ACTIVE_AT = 11;
+
+        // Cross order sent to exchange and waiting approval from exchange and/or counterparties.
+        APPROVE_REQUIRED = 12;
+
+        // Cross order is approved by exchange and counterparties.
+        APPROVED = 13;
+
+        //Cross order is rejected by one of counterparties.
+        APPROVE_REJECTED = 14;
+
+        //Cross order is completely executed on exchange. It is the final state of cross order.
+        MATCHED = 15;
+    }
+
+    // Order or fill open/close type enum.
+    enum OpenCloseType
+    {
+        // Opening new current day position.
+        OPEN = 1;
+
+        // Closing (current day only if instrument uses explicit close).
+        CLOSE = 2;
+
+        // Closing previous day (if instrument uses explicit close).
+        CLOSE_PREVIOUS = 3;
+    }
+
+    // Order or fill speculation type enum.
+    enum SpeculationType
+    {
+        // Speculation.
+        SPECULATION = 1;
+
+        // Hedge.
+        HEDGE = 2;
+
+        // Arbitrage.
+        ARBITRAGE = 3;
+    }
+
+    // Identifier of an order chain (it is equal to the order_id of the first request in the chain).
+    required string chain_order_id = 1;
+
+    // Order identifier of the last not rejected order request (except rejected initial place request)
+    // which defines the current status of the chain.
+    required string order_id = 2;
+
+    // Account ID that was used to create the chain.
+    required sint32 chain_orig_account_id = 4;
+
+    // Time when order was submitted to execution system (UTC).
+    required sint64 submitted_utc_time = 5;
+
+    // Full contract symbol.
+    required string contract_symbol = 6;
+
+    // Order side.
+    // This field is associated with OrderChain.Side enum type.
+    required uint32 side = 7;
+
+    // [obsolete] Use size field instead.
+    optional uint32 obsolete_size = 8 [deprecated = true];
+
+    // Order limit price.
+    // Correct price format.
+    optional double limit_price = 9;
+
+    // Order stop price.
+    // Correct price format.
+    optional double stop_price = 10;
+
+    // List of execution instructions.
+    // This field is associated with OrderChain.ExecInstruction enum type.
+    repeated uint32 exec_instruction = 11;
+
+    // Order duration.
+    // This field is associated with OrderChain.Duration enum type.
+    required uint32 duration = 12;
+
+    // Date for GTD (local to exchange, date only value in time format) when the order should expire.
+    optional sint64 good_thru_date = 13;
+
+    // Date and time for GTT order (UTC) when the order should expire.
+    optional sint64 good_thru_utc_time = 14;
+
+    // Order status.
+    // This field is associated with OrderChain.Status enum type.
+    required uint32 status = 15;
+
+    // Order type.
+    // This field is associated with OrderChain.OrderType enum type.
+    required uint32 order_type = 16;
+
+    // List of order requests in the chain.
+    repeated OrderRequest order_request = 17;
+
+    // Order fills.
+    repeated OrderFill order_fill = 18;
+
+    // The values are associated with a lookup property with ORDER_CLASS type.
+    repeated string order_classes = 19;
+
+    // Order limit price.
+    // Display price format.
+    optional sint64 display_limit_price = 20;
+
+    // Order stop price.
+    // Display price format.
+    optional sint64 display_stop_price = 21;
+
+    // Account name provided to exchange.
+    optional string execution_account_name = 22;
+
+    // Trailing specific information.
+    optional OrderTrailing trailing = 23;
+
+    // Specific order sizes.
+    optional OrderSizes sizes = 24;
+
+    // Full list of accounts towards exchange.
+    repeated ChainAccount accounts = 25;
+
+    // Associated compound orders tree identifier.
+    optional string compound_tree_id = 26;
+
+    // In case of some synthetics.
+    optional string root_chain_order_id = 27;
+
+    // Order can be checked for any reason.
+    optional bool checked = 28;
+
+    // Strategy trading expression.
+    optional string trading_expression = 29;
+
+    // Order's contract legs
+    repeated OrderContractLeg legs = 30;
+
+    // Full contract description.
+    // Formula in case of strategy.
+    optional string contract_description = 31;
+
+    // Additional user defined attributes.
+    // First - name, second - value.
+    repeated common_1.Tuple user_attributes = 32;
+
+    // Client-side determined algo strategy.
+    optional string client_algo_strategy = 33;
+
+    // Gateway-side algo strategy.
+    optional string algo_strategy = 34;
+
+    // Actual order route.
+    optional OrderRoute route = 35;
+
+    // Order chain expiration time.
+    optional sint64 expiration_time = 36;
+
+    // Order open/close type.
+    // This field is associated with OrderChain.OpenCloseType enum type.
+    optional uint32 open_close_type = 37;
+
+    // Order speculation type.
+    // This field is associated with OrderChain.SpeculationType enum type.
+    optional uint32 speculation_type = 38;
+
+    // Archived order.
+    optional bool archived = 39;
+
+    // Current order request at exchange.
+    optional string order_id_at_exchange = 40;
+
+    // Discretionary offset, in the number of ticks.
+    optional uint32 discretionary_offset = 41;
+
+    // [required] Total positive size of the order.
+    optional cqg.Decimal size = 42;
+
+    // Order extended side.
+    // This field is associated with ExtendedSide enum type.
+    optional uint32 extended_side = 43;
+
+    // Identifies a brokerage that lended an equity being sold short.
+    // (max length = 64).
+    optional string locate_id = 44;
+}
+
+// Represents account in the chain of accounts.
+message ChainAccount
+{
+    // Account identifier.
+    optional string account_id = 1;
+
+    // Account name.
+    optional string account_name = 2;
+
+    // Brokerage account number.
+    optional string brokerage_account_number = 3;
+}
+
+// Represents route through which order is executed.
+message OrderRoute
+{
+    // Route unique code.
+    optional string code = 1;
+
+    // Route name.
+    optional string name = 2;
+
+    // Route order id.
+    optional string order_id = 3;
+}
+
+// Represents order's contract leg.
+message OrderContractLeg
+{
+    // Leg number.
+    optional uint32 number = 1;
+
+    // [obsolete] Use size field instead.
+    optional uint32 obsolete_size = 2 [deprecated = true];
+
+    // Order side.
+    // This field is associated with OrderChain.Side enum type.
+    optional uint32 side = 3;
+
+    // Full contract symbol.
+    optional string contract_symbol = 4;
+
+    // Total positive size of the leg.
+    optional cqg.Decimal size = 5;
+
+    // Order extended side.
+    // This field is associated with ExtendedSide enum type.
+    optional uint32 extended_side = 6;
+
+    // Identifies a brokerage that lended an equity being sold short.
+    // (max length = 64)
+    optional string locate_id = 7;
+}
+
+// Account and user information associated with an order request.
+message AccountAndUserInfo
+{
+    // Trade routing account identifier.
+    required sint32 account_id = 1;
+
+    // Associated user information. Contains either user_name that initiated the order request on
+    // this account or Brokerage name of the next omnibus account in the chain.
+    required string user_info = 2;
+
+    // Reject details for rejected order request.
+    optional string reject_details = 3;
+
+    // Additional internal reject details for rejected order request.
+    optional string reject_details_internal = 4;
+
+    // ID of a user who placed the order.
+    optional string user_id = 5;
+
+    // User name.
+    optional string user_name = 6;
+
+    // Account name.
+    optional string account_name = 7;
+
+    // Brokerage account number.
+    optional string brokerage_account_number = 8;
+}
+
+// Trade routing order request.
+// Attributes of the order request (place, replace or cancel) allow to track order changes during the its lifetime.
+message OrderRequest
+{
+    // Type of order request in order chain.
+    enum RequestType
+    {
+        // New order place request.
+        PLACE = 1;
+
+        // Replace order request.
+        REPLACE = 2;
+
+        // Cancel order request.
+        CANCEL = 3;
+    }
+
+    // State of order request.
+    enum State
+    {
+        // Order is waiting for trading session start time for activation.
+        ACTIVE_AT = 1;
+
+        // Order request is suspended.
+        SUSPENDED = 2;
+
+        // Order request is sent to an execution system and is waiting for acknowledgment.
+        PENDING = 3;
+
+        // Order request is working at an execution system.
+        WORKING = 4;
+
+        // Order request is replaced with a new one.
+        REPLACED = 5;
+
+        // Order request is cancelled.
+        CANCELLED = 6;
+
+        // Order request is rejected.
+        REJECTED = 7;
+
+        // Order request is filled.
+        FILLED = 8;
+
+        // Order request is expired.
+        EXPIRED = 9;
+
+        // Order request is matched.
+        MATCHED = 10;
+    }
+
+    // Order request identifier assigned by server.
+    required string order_id = 1;
+
+    // Time when order request was submitted to execution system (UTC).
+    required sint64 submitted_utc_time = 2;
+
+    // Type of the request.
+    // This field is associated with OrderRequest.RequestType enum type.
+    required uint32 request_type = 3;
+
+    // Order type.
+    // This field is associated with OrderChain.OrderType enum type.
+    optional uint32 order_type = 4;
+
+    // [obsolete] Use size field instead.
+    optional uint32 obsolete_size = 6 [deprecated = true];
+
+    // Order limit price.
+    // Correct price format.
+    optional double limit_price = 7;
+
+    // Order stop price.
+    // Correct price format.
+    optional double stop_price = 8;
+
+    // Order duration.
+    // This field is associated with OrderChain.Duration enum type.
+    optional uint32 duration = 9;
+
+    // Date for GTD (local to exchange, date only value in time format) when the order should expire.
+    optional sint64 good_thru_date = 10;
+
+    // Date and time for GTT order (UTC) when the order should expire.
+    optional sint64 good_thru_utc_time = 11;
+
+    // Current order request state.
+    // This field is associated with OrderRequest.State enum type.
+    required uint32 state = 12;
+
+    // ID of order request that this request was applied to (for cancel and replace requests only).
+    optional string link_order_id = 13;
+
+    // List of [last] transactions.
+    // All available transactions are sent.
+    repeated OrderTransactionStatus transaction_status = 14;
+
+    // List of accounts associated with an order request with user information.
+    repeated AccountAndUserInfo account_and_user_info = 15;
+
+    // Order limit price.
+    // Display price format.
+    optional sint64 display_limit_price = 16;
+
+    // Order stop price.
+    // Display price format.
+    optional sint64 display_stop_price = 17;
+
+    // Trailing specific information.
+    optional OrderTrailing trailing = 19;
+
+    // Specific order sizes.
+    optional OrderSizes sizes = 20;
+
+    // Ticket number.
+    optional string ticket_number = 21;
+
+    // Request comments.
+    optional string comments = 22;
+
+    // The values are associated with a lookup property with ORDER_CLASS type.
+    repeated string order_classes = 23;
+
+    // Native order type.
+    optional uint32 native_order_type = 24;
+
+    // Activation time.
+    optional sint64 activation_time = 25;
+
+    // Park time.
+    optional sint64 suspension_time = 26;
+
+    // Expiration time.
+    optional sint64 expiration_time = 27;
+
+    // Routes.
+    repeated OrderRoute routes = 28;
+
+    // Client regulation algorithm.
+    optional string client_regulatory_algorithm_id = 29;
+
+    // Effective regulation algorithm.
+    optional string effective_regulatory_algorithm_id = 30;
+
+    // Operational details.
+    optional OperationalDetails operational_details = 34;
+
+    // Specific instructions.
+    optional string instructions = 35;
+
+    // Client extra values.
+    // First - name, second - value.
+    repeated common_1.Tuple client_extra_values = 36;
+
+    // Route client order ID.
+    optional string route_client_order_id = 37;
+
+    // Discretionary offset, in the number of ticks.
+    optional uint32 discretionary_offset = 38;
+
+    // List of execution instructions.
+    // This field is associated with OrderChain.ExecInstruction enum type.
+    repeated uint32 exec_instruction = 39;
+
+    // Positive size of the order request.
+    optional cqg.Decimal size = 40;
+
+    // Actual execution source code that is sent to an exchange.
+    optional string execution_source_code = 41;
+
+    // Order extended side.
+    // This field is associated with ExtendedSide enum type.
+    optional uint32 extended_side = 42;
+
+    // Identifies a brokerage that lended an equity being sold short.
+    // (max length = 64)
+    optional string locate_id = 43;
+}
+
+// Represents order sizes.
+message OrderSizes
+{
+    // [obsolete] Use trigger_size field instead.
+    optional uint32 obsolete_trigger_size = 1 [deprecated = true];
+
+    // [obsolete] Use visible_size field instead.
+    optional uint32 obsolete_visible_size = 2 [deprecated = true];
+
+    // [obsolete] Use min_visible_size field instead.
+    optional uint32 obsolete_min_visible_size = 3 [deprecated = true];
+
+    // [obsolete] Use remaining_size field instead.
+    optional uint32 obsolete_remaining_size = 4 [deprecated = true];
+
+    // Trigger size. (DOM Threshold).
+    optional cqg.Decimal trigger_size = 5;
+
+    // Visible size. Iceberg.
+    optional cqg.Decimal visible_size = 6;
+
+    // Minimum visible size. Iceberg.
+    optional cqg.Decimal min_visible_size = 7;
+
+    // Remaining size of chain (set only for chain).
+    optional cqg.Decimal remaining_size = 8;
+}
+
+// Represents order trailing information.
+message OrderTrailing
+{
+    // Trailing type.
+    enum TrailType
+    {
+        BEST_BID = 1;
+        BEST_ASK = 2;
+        LAST_TRADE = 3;
+    }
+
+    // This field is associated with TrailType enum type.
+    optional uint32 trail_type = 1;
+
+    // Trail offset.
+    // Correct format.
+    optional double offset = 2;
+
+    // Trail stop price.
+    // Correct format.
+    optional double stop_price = 3;
+
+    // Trail limit price.
+    // Correct format.
+    optional double limit_price = 4;
+
+    // Trail offset.
+    // Display format.
+    optional sint64 display_offset = 5;
+
+    // Trail stop price.
+    // Display format.
+    optional sint64 display_stop_price = 6;
+
+    // Trail limit price.
+    // Display format.
+    optional sint64 display_limit_price = 7;
+
+    // Prices update time.
+    optional sint64 update_time = 8;
+}
+
+// Operational details.
+message OperationalDetails
+{
+    // Client-side order id.
+    optional string client_order_id = 1;
+
+    // Unique client guid.
+    optional string client_guid = 2;
+
+    // Client unique system id.
+    // Hidden for Sale Series scope.
+    optional string client_system_id = 3;
+
+    // Client ip address.
+    optional string client_ip = 4;
+
+    // Client application version.
+    optional string client_version = 5;
+
+    // Trade location.
+    optional string trade_location_id = 6;
+
+    // Product to which client application belongs.
+    // Can be used to obtain IDs of CAT, PL and Platform.
+    optional string product_id = 7;
+
+    // Client application name.
+    optional string client_app_type_name = 8;
+
+    // Name of the platform to which client application belongs.
+    optional string platform_name = 9;
+
+    // Client application private label name.
+    optional string private_label_name = 10;
+}
+
+// Status of a specific transaction.
+// All attributes are at the transaction moment.
+message OrderTransactionStatus
+{
+    // Status of the transaction.
+    enum Status
+    {
+        // This status is used for internal Gateway transactions.
+        UNDEFINED = 0;
+
+        // Original order is sent to execution system.
+        IN_TRANSIT = 1;
+
+        // Original order is rejected (exception).
+        REJECTED = 2;
+
+        // Order is acknowledged by execution system.
+        ACK_PLACE = 3;
+
+        // Order is expired (exception).
+        EXPIRED = 4;
+
+        // Cancel request is sent to execution system.
+        IN_CANCEL = 5;
+
+        // Cancel is acknowledged by execution system.
+        ACK_CANCEL = 6;
+
+        // Cancel request is rejected (exception).
+        REJECT_CANCEL = 7;
+
+        // Modify request is sent to execution system.
+        IN_MODIFY = 8;
+
+        // Modify is acknowledged by execution system.
+        ACK_MODIFY = 9;
+
+        // Modify request is rejected (exception).
+        REJECT_MODIFY = 10;
+
+        // Fill event is received from execution system.
+        FILL = 11;
+
+        // Order is suspended.
+        SUSPEND = 12;
+
+        // Referenced fill is corrected.
+        FILL_CORRECT = 13;
+
+        // Referenced fill is canceled (exception).
+        FILL_CANCEL = 14;
+
+        // Referenced fill is busted (exception).
+        FILL_BUST = 15;
+
+        // Acknowledgment that order will activate at specified time.
+        ACTIVEAT = 16;
+
+        // Order may be canceled because a disconnect occurred (exception).
+        DISCONNECT = 17;
+
+        // Synthetic order was sent to the actual execution system.
+        SYNTHETIC_ACTIVATED = 18;
+
+        // Order status and/ or attributes are updated.
+        UPDATE = 19;
+
+        // Synthetic strategy execution failed.
+        SYNTHETIC_FAILED = 20;
+
+        // Synthetic strategy order has at least one overfilled leg.
+        SYNTHETIC_OVERFILL = 21;
+
+        // Hanging quantity update for the synthetic strategy order.
+        SYNTHETIC_HANG = 22;
+
+        // Cross order is acknowledged by exchange but waiting for approval from counter-parties.
+        APPROVING = 23;
+
+        // Cross order is waiting for approval from the client (i.e. from the side/participant that received this transaction).
+        APPROVE_REQUESTED = 24;
+
+        // The exchange approved the cross order.
+        APPROVED_BY_EXCHANGE = 25;
+
+        // Cross order is rejected by one of its participants.
+        REJECTED_BY_USER = 26;
+
+        // Cross order is completely executed on exchange, this is the final state of the cross order.
+        MATCHED = 27;
+    }
+    // This field is associated with Status enum type.
+    required uint32 status = 1;
+
+    // Order transaction identifier, unique within order chain.
+    required uint64 trans_id = 2;
+
+    // Transaction time assigned by server (UTC).
+    required sint64 trans_utc_time = 3;
+
+    // Order request state at the transaction moment.
+    // This field is associated with OrderRequest.State enum type.
+    required uint32 order_state = 4;
+
+    // Order chain status at the transaction moment.
+    // This field is associated with OrderChain.Status enum type.
+    required uint32 order_chain_status = 5;
+
+    // Additional transaction comments.
+    optional string text_message = 6;
+
+    // Updated discretionary offset in the number of ticks.
+    optional uint32 new_discretionary_offset  = 7;
+
+    // Discretionary offset before the change.
+    optional uint32 prev_discretionary_offset  = 8;
+}
+
+// Gateway order fill.
+message OrderFill
+{
+    // Trade routing order fill unique identifier.
+    optional sint64 id = 1;
+
+    // Trade routing order fill execution identifier.
+    optional string exec_id = 2;
+
+    // [obsolete] Use quantity field instead.
+    optional uint32 obsolete_quantity = 3 [deprecated = true];
+
+    // Price at which the lots were bought or sold.
+    // Correct price.
+    optional double price = 4;
+
+    // UTC time the fill happened (offset in milliseconds from 01.01.1970).
+    optional sint64 fill_utc_time = 5;
+
+    // Flag that trade was aggressive (Fixed Income specific order modifier).
+    optional bool is_aggressive = 6;
+
+    // Leg fills associated with this order fill.
+    repeated LegFill leg_fills = 7;
+
+    // Interesting to show.
+    // Order request ID associated with the fill.
+    optional string order_id = 8;
+
+    // Possible fill status.
+    enum FillStatus
+    {
+        // Regular valid fill.
+        VALID = 1;
+
+        // Fill was busted.
+        BUSTED = 2;
+
+        // Fill was corrected.
+        CORRECTED = 3;
+
+        // Fill was cancelled.
+        CANCELLED = 4;
+    }
+
+    // Status of the fill.
+    // The value is associated with FillStatus enum.
+    optional uint32 fill_status = 9;
+
+    // Associated fill care order request id.
+    optional string fill_care_order_request_id = 10;
+
+    // Price at which the lots were bought or sold.
+    // Display price.
+    optional sint64 display_price = 11;
+
+    // Fill open/close type.
+    // This field is associated with OrderChain.OpenCloseType enum type.
+    optional uint32 open_close_type = 12;
+
+    // Fill speculation type.
+    // This field is associated with OrderChain.SpeculationType enum type.
+    optional uint32 speculation_type = 13;
+
+    // Commission value of the fill.
+    optional double commission = 14;
+
+    // Commission currency code (ISO 4217 based) of the fill.
+    optional string commission_currency = 15;
+
+    // Quantity of bought or sold lots depending on order side.
+    optional cqg.Decimal quantity = 16;
+}
+
+// Trade routing fill leg.
+message LegFill
+{
+    // Trade routing leg fill unique identifier.
+    optional sint64 id = 1;
+
+    // Trade routing leg fill execution identifier.
+    optional string exec_id = 2;
+
+    // Full contract symbol for this leg.
+    optional string contract_symbol = 3;
+
+    // [obsolete] Use quantity field instead.
+    optional uint32 obsolete_quantity = 4 [deprecated = true];
+
+    // Leg side.
+    // This field is associated with OrderChain.Side enum type.
+    optional uint32 side = 5;
+
+    // Price at which the lots were bought or sold.
+    // Correct price.
+    optional double price = 6;
+
+    // UTC time the fill happened (offset in milliseconds from 01.01.1970).
+    optional sint64 fill_utc_time = 7;
+
+    // Status of the leg fill.
+    // The value is associated with OrderFill.FillStatus enum.
+    optional uint32 fill_status = 8;
+
+    // Price at which the lots were bought or sold.
+    // Display price.
+    optional sint64 display_price = 9;
+
+    // Leg fill open/close type.
+    // This field is associated with OrderChain.OpenCloseType enum type.
+    optional uint32 open_close_type = 10;
+
+    // Leg fill speculation type.
+    // This field is associated with OrderChain.SpeculationType enum type.
+    optional uint32 speculation_type = 11;
+
+    // Flag that trade was aggressive (Fixed Income specific order modifier).
+    optional bool is_aggressive = 12;
+
+    // Quantity of bought or sold lots depending on leg side.
+    optional cqg.Decimal quantity = 13;
+
+    // Order extended side.
+    // This field is associated with ExtendedSide enum type.
+    optional uint32 extended_side = 14;
+
+    // Identifies a brokerage that lended an equity being sold short.
+    // (max length = 64)
+    optional string locate_id = 15;
+}
+
+// Represents order with related child orders.
+message RelatedOrder
+{
+    // [required] Associated Order chain.
+    optional OrderChain order_chain = 1;
+
+    // Child order chains.
+    repeated RelatedOrder children = 2;
+
+    // [required] Leg path.
+    // Example: '1/2/'.
+    optional string leg_path = 3;
+}
+
+// Represents compound order with child orders.
+message CompoundOrder
+{
+    enum CompoundOrderNodeRole
+    {
+        // Root of tree.
+        ROOT = 1;
+
+        // Order place order primary.
+        OPO_PRIMARY = 2;
+
+        // Order place order secondary.
+        OPO_SECONDARY = 3;
+
+        // Order cancel order.
+        OCO_ROLE = 4;
+
+        // Independent compound.
+        INDEPENDENT_ROLE = 5;
+    }
+
+    enum CompoundOrderType
+    {
+        // Order cancel order.
+        OCO = 1;
+
+        // Order place order.
+        OPO = 2;
+
+        // Order type. Compound order with ORDER type is associated with order chain.
+        ORDER = 3;
+
+        // Independent compound relation as set of two or more of otherwise unrelated orders being placed in one action.
+        INDEPENDENT = 4;
+    }
+
+    enum CompoundOrderTriggerType
+    {
+        // Default value for compound order. Indicates whether сompound order is working.
+        Working = 1;
+
+        // Indicates whether сompound order has been filled.
+        Filled = 2;
+
+        // Indicates whether сompound order has been cancelled.
+        Cancelled = 3;
+    }
+
+    // [required] Compound order id.
+    optional string id = 1;
+
+    // [required] Compound role.
+    // This field is associated with CompoundOrder.CompoundOrderNodeRole enum type.
+    optional uint32 node_role = 2;
+
+    // [required] Compound type.
+    // This field is associated with CompoundOrder.CompoundOrderType enum type.
+    optional uint32 type = 3;
+
+    // [required] Unique compound client guid.
+    optional string client_guid = 5;
+
+    // [required] Trigger on market type.
+    // This field is associated with CompoundOrder.CompoundOrderTriggerType enum type.
+    optional uint32 trigger_type = 6;
+
+    // Associated order chain.
+    // Required when compound order type is ORDER.
+    optional OrderChain order_chain = 7;
+
+    // Child compounds.
+    repeated CompoundOrder children = 8;
+}
+
+// Represents strategy leg with child legs.
+message StrategyLeg
+{
+    enum StrategyMode
+    {
+        // All legs executed.
+        ALL = 1;
+
+        // Aggregate legs.
+        AGGR = 2;
+
+        // Multiplicative strategy.
+        MUL = 3;
+    }
+
+    // [required] Leg path.
+    optional string leg_path = 1;
+
+    // [required] Strategy contract.
+    optional string contract_symbol = 2;
+
+    // [obsolete] Use quantity_ratio field instead.
+    optional double obsolete_quantity_ratio = 3 [deprecated = true];
+
+    // [required] Price ratio.
+    optional double price_ratio = 4;
+
+    // [required] Associated with StrategyMode enum.
+    optional uint32 mode = 5;
+
+    // [required] Account.
+    optional ChainAccount account = 6;
+
+    // Yield model.
+    // First - key, second - value.
+    repeated common_1.Tuple yield_model = 7;
+
+    // Child legs.
+    repeated StrategyLeg legs = 8;
+
+    // Strategy leg open/close type.
+    // This field is associated with OrderChain.OpenCloseType enum type.
+    optional uint32 open_close_type = 9;
+
+    // Strategy leg speculation type.
+    // This field is associated with OrderChain.SpeculationType enum type.
+    optional uint32 speculation_type = 10;
+
+    // [required] Quantity ratio.
+    optional cqg.Decimal quantity_ratio = 11;
+}
+
+// Represents general information about CQG Gateway account.
+message Account
+{
+    // [required-update] Trade routing account identifier.
+    // Omit the value during account creation.
+    optional sint32 id = 1;
+
+    // [required-create] Account name (max length = 64).
+    // Can contain prefix (like SIM for simalation account) which cannot be changed.
+    optional string name = 2;
+
+    // [required-create] Brokerage account number (max length = 12).
+    // Can contain prefix (like PS for permanent simulation) which cannot be changed.
+    optional string brokerage_account_number = 3;
+
+    // [immutable][obsolete] Use sales_series_id field instead.
+    // Sales series number.
+    // Cannot be changed directly with UpdateAccount message, but can be changed by changing sales_series_id.
+    optional string obsolete_sales_series_number = 4 [deprecated = true];
+
+    // [immutable][obsolete] Use sales_series_id field instead.
+    // Sales series name.
+    // Cannot be changed directly with UpdateAccount message, but can be changed by changing sales_series_id.
+    optional string obsolete_sales_series_name = 5 [deprecated = true];
+
+    // [immutable][obsolete] Use brokerage_id field instead.
+    // Brokerage name.
+    optional string obsolete_brokerage_name = 6 [deprecated = true];
+
+    // Account class enumeration.
+    enum Class
+    {
+        // Regular account class.
+        REGULAR = 1;
+
+        // Template account class.
+        // This class is used for back office parsing not for clonning.
+        TEMPLATE = 2;
+
+        // Omnibus account class.
+        OMNIBUS = 3;
+    }
+
+    // [immutable-update][required-create] This field is associated with Class enum.
+    optional uint32 class = 8;
+
+    // [required-create] Id of customer - owner of the account.
+    // If changed then new customer must belong to the same brokerage.
+    // Mutually exclusive with profile_id.
+    // Use profile_id instead.
+    optional string customer_id = 9;
+
+    // [immutable] Risk server instance which calculates risks for this account (includes related Gateway location).
+    optional string risk_server_instance = 10;
+
+    // [required-create] Type of the account (e.g. 'Customer Account', 'House Account', etc.)
+    // List of available account types can be obtained with:
+    // LookupPropertyListRequest { property_type = TradeRoutingLookupPropertyType.ACCOUNT_TYPE }
+    optional string account_type_id = 11;
+
+    // [required-create] ID of related sales series.
+    // If changed then new sales series must belong to the same brokerage.
+    // Mutually exclusive with profile_sales_series_id.
+    // Use profile_sales_series_id instead.
+    optional string sales_series_id = 12;
+
+    // [immutable] ID of related brokerage.
+    optional string brokerage_id = 13;
+
+    // [immutable] Default account currency code (ISO 4217).
+    optional string currency = 14;
+
+    // Account sub-class enumeration.
+    enum SubClass
+    {
+        // Regular account sub-class.
+        SUB_CLASS_REGULAR = 1;
+
+        // Gateway internal account sub-class.
+        SUB_CLASS_INTERNAL = 2;
+    }
+
+    // This field is associated with SubClass enum.
+    // Can be set/changed only for account with class = 3 (omnibus).
+    optional uint32 sub_class = 15;
+
+    // [immutable-update] Risk server instance id.
+    // If not set during CreateAccount message, default brokerage one is used.
+    optional string risk_server_instance_id = 16;
+
+    // [obsolete] ID of account cluster the account points to.
+    optional string obsolete_account_cluster_id = 17 [deprecated = true];
+
+    // [immutable] Determines, whether account is removed.
+    optional bool removed = 18;
+
+    // [immutable] Determines group role (master/sub-account)
+    // in case when account belongs to a group.
+    optional bool is_master = 19;
+
+    // [immutable] This field is associated with AccountGroup.RelationType enum.
+    // Specifies group relation type in case when account belongs to a group.
+    optional uint32 group_relation_type = 20;
+
+    // [immutable] Determines if account is collection.
+    optional bool is_collection = 21;
+
+    // [required-create] Id of profile - owner of the account.
+    // If changed then new profile must belong to the same brokerage.
+    // Mutually exclusive with customer_id.
+    // Supported profile types: admin, customer.
+    optional string profile_id = 22;
+
+    // [required-create] ID of linked sales series profile.
+    // If changed then new sales series profile must belong to the same brokerage.
+    // Mutually exclusive with sales_series_id.
+    optional string profile_sales_series_id = 23;
+
+    // [immutable] Determines if account has migration request(s) not in final state.
+    optional bool is_in_migration = 24;
+}
+
+// Gateway balance record.
+message BalanceRecord
+{
+    // Trade routing account identifier.
+    required sint32 account_id = 1;
+
+    // Balance record identifier.
+    required sint32 balance_record_id = 2;
+
+    // Currency code (real currency code is ISO 4217 based.
+    required string currency = 3;
+
+    // End cash balance.
+    optional double end_cash_balance = 4;
+
+    // Collateral.
+    optional double collateral = 5;
+
+    // Previous close date (date value only) (UTC).
+    optional sint64 as_of_date = 6;
+
+    // Represents balance origin enum.
+    enum BalanceOrigin
+    {
+        // Not-available.
+        NA = 1;
+
+        // Local balance.
+        LOCAL = 2;
+
+        // Abroad balance.
+        OVERSEAS = 3;
+    }
+
+    // [immutable] Balance origin.
+    // This field is associated with BalanceOrigin enum type.
+    optional uint32 origin = 7;
+
+    // Regulated.
+    optional bool regulated = 8;
+}
+
+// Information about one of the found accounts.
+message AccountSearchResultRecord
+{
+    // Trade routing account identifier.
+    required sint32 account_id = 1;
+
+    // Account name.
+    required string name = 2;
+
+    // Brokerage account number.
+    required string brokerage_account_number = 3;
+
+    // Sales series number.
+    required string sales_series_number = 4;
+
+    // Sales series name.
+    required string sales_series_name = 5;
+
+    // Brokerage name.
+    required string brokerage_name = 6;
+
+    // Id of customer - owner of the account.
+    // Use profile_id instead.
+    optional string customer_id = 7;
+
+    // Name of customer - owner of the account.
+    optional string customer_name = 8;
+
+    // Removed flag.
+    optional bool removed = 9;
+
+    // Id of sales series.
+    // Use profile_sales_series_id instead.
+    optional string sales_series_id = 10;
+
+    optional string brokerage_id = 11;
+
+    optional string risk_server_instance_id = 12;
+
+    optional string group_id = 13;
+
+    // This field is associated with Class enum.
+    optional uint32 class = 14;
+
+    // Owner profile id.
+    optional string profile_id = 15;
+
+    // Linked sales series profile id.
+    optional string profile_sales_series_id = 16;
+}
+
+// Information about enabled account route.
+message AccountRouteRecord
+{
+    // Values indicating whether CQG MiFID Algo "CQG Variable Latency" should be applyed.
+    enum ForceVariableLatencyAlgo
+    {
+        // Never for any orders on this route.
+        DISABLED = 0;
+
+        // For any orders on this route if they do not already have a CQG Algo or Spreader orders.
+        NON_CQG_ALGO_ORDERS = 1;
+
+        // Always for any orders on this route if they are not Spreader orders.
+        ALL_NON_SPREADER_ORDERS =2;
+    }
+
+    // List of field ids to clear during update operation.
+    repeated uint32 cleared_fields = 9;
+
+    // [required] Code number of the route.
+    optional sint32 route_code = 1;
+
+    // [obsolete] Route name.
+    // See RouteInformation.name field.
+    optional string obsolete_route_name = 2 [deprecated = true];
+
+    // [required] Account priority of the route.
+    optional sint32 priority = 3;
+
+    // Omnibus account ID if it is used for this route.
+    optional sint32 omnibus_account_id = 4;
+
+    // [obsolete] Omnibus account name if it is used for this route.
+    // See Route.omnibus_accounts field.
+    optional string obsolete_omnibus_account_name = 5 [deprecated = true];
+
+    // List of route attributes with values.
+    repeated AccountRouteAttribute attributes = 6;
+
+    // [immutable] If set, route is in use by some other account using this configured route.
+    optional bool is_in_use = 7;
+
+    // Indicates whether synthetic orders are allowed on this route for this account.
+    // Can be 'true' only if route allows synthetic orders (RouteInformation.allow_synthetic_order_types).
+    optional bool allow_synthetic_order_types = 8;
+
+    // 9 is occupied by cleared_fields.
+
+    // Indicates whether the algo_strategies_whitelist contains information about allowed algorithmic strategies.
+    // Otherwise all available algorithmic strategies on particular route are allowed for the account.
+    optional bool enable_algo_strategies_whitelist = 10;
+
+    // List of route algorithmic strategy ids allowed to account on particular route.
+    // Can contain specific algorithmic strategy enablement in case when enable_algo_strategies_whitelist flag is set.
+    // Provide the field id in cleared_fields to reset the value during update operation.
+    repeated string algo_strategies_whitelist = 11;
+
+    // Flag indicating whether during doing order route calculation, Risk Server should enforce
+    // that a route enabled as "CQG Algo orders only" is only used for the order when it has a CQG MiFID Algo ID.
+    optional bool cqg_algo_orders_only = 12;
+
+    // This field is associated with ForceVariableLatencyAlgo enum.
+    optional uint32 force_variable_latency_algo = 13;
+}
+
+// Route attributes.
+message AccountRouteAttribute
+{
+    // [immutable] Route attribute name.
+    required string Name = 1;
+
+    // Route attribute value.
+    optional string Value = 2;
+
+    // [required][immutable] attribute id.
+    optional string id = 3;
+}
+
+// Account to user authorization link.
+message AccountUserLink
+{
+    // [required] Account ID.
+    optional sint32 account_id = 1;
+
+    // [required] User ID.
+    optional string user_id = 2;
+
+    // True means the trader can only view account activity.
+    optional bool is_view_only = 3;
+
+    // Determines if Gateway will automatically park trader's orders as Care Orders.
+    optional bool is_force_care = 4;
+
+    // [immutable] User name.
+    optional string user_name = 5;
+
+    // [immutable] Account name.
+    optional string account_name = 6;
+
+    // [immutable] Brokerage account number.
+    optional string brokerage_account_number = 7;
+
+    // [immutable] Account's brokerage name.
+    optional string brokerage_name = 8;
+
+    // Enables trader to place orders into external FCM account number.
+    optional bool allow_external_accounts = 9;
+
+    // [immutable] Authorization via brokerage or sales series.
+    optional bool implicit_authorization = 10;
+
+    // Execution Source Code that is used for orders placed by user_id on account_id.
+    // This is not an actual code but ID that can be obtained from lookup (value field).
+    // LookupPropertyListRequest { property_type = TradeRoutingLookupPropertyType.EXECUTION_SOURCE_CODE }
+    optional string execution_source_code_id = 11;
+
+    // [immutable] Account's brokerage identifier.
+    optional string account_brokerage_id = 12;
+
+    // [immutable] Account's sales series identifier.
+    optional string account_sales_series_id = 13;
+
+    // Indicates whether orders on Brokerage/Sales series accounts
+    // should be flagged as Direct Electronic Access under MiFID.
+    optional bool is_mifid_dea = 14;
+
+    // Forces CQG MiFID algorithms to be treated as client algorithms rather than firm algorithms.
+    optional bool transform_mifid_algo_cqg_to_client_algo = 15;
+
+    // Indicates whether trade-routing login is primary on account.
+    // If account already has primary login then it will be
+    // cleared from account and new one is set.
+    optional bool is_primary_login = 16;
+}
+
+// Account settings.
+message AccountSettings
+{
+    // List of field ids to clear during update operation.
+    repeated uint32 cleared_fields = 18;
+
+    // [required] Trade routing account identifier.
+    optional sint32 account_id = 1;
+
+    // [obsolete] Block account indicator. The field is obsolete and always has False value.
+    optional bool obsolete_is_block = 2 [deprecated = true];
+
+    // [obsolete] Block size if this is a block account.
+    optional sint32 obsolete_block_size = 3 [deprecated = true];
+
+    // Give up account indicator.
+    optional bool is_giveup = 4;
+
+    // [obsolete] Use giveup_brokerage_id field instead.
+    // Give up brokerage name if this is a give up account.
+    optional string obsolete_giveup_brokerage_name = 5 [deprecated = true];
+
+    // Account statement processing option enumeration (account clearing).
+    enum StatementOption
+    {
+        // Generate complete daily statement (simulated clearing).
+        GENERATE = 1;
+
+        // Process statements as received from a brokerage.
+        BROKERAGE = 2;
+
+        // Reset to zero positions at the end of the day.
+        RESET = 3;
+    }
+
+    // This field is associated with StatementOption enum.
+    optional uint32 statement_option = 6;
+
+    // If statement processing option is RESET this field indicates if balances are reset to zero along with positions.
+    optional bool zero_balance = 7;
+
+    // Reconciliation indicator. Account follows brokerage reconciliation setting if the filed is omitted.
+    // Provide cleared_fields to clear this field.
+    optional bool reconciliation = 8;
+
+    // Give up brokerage id if this is a give up account.
+    optional string giveup_brokerage_id = 9;
+
+    // Start of account trading time in ISO 8601 format.
+    // Only time must be provided.
+    optional string trading_time_from = 10;
+
+    // End of account trading time in ISO 8601 format.
+    // Only time must be provided.
+    // Must be provided with the same time zone if start time is set.
+    optional string trading_time_to = 11;
+
+    // Trading time zone.
+    // The value are associated with a lookup property with TIME_ZONE type.
+    optional string trading_time_zone = 12;
+
+    // Allow to liquidate orders outside trading time, if trading time is set.
+    optional bool liquidation_orders_outside_trading_time = 13;
+
+    // Instruct account indicator.
+    optional bool is_instruct = 14;
+
+    // Allow externally provided execution of account.
+    optional bool externally_provided_execution = 15;
+
+    // Associated MODES account groups.
+    // The values are associated with a lookup property with MODES_ACCOUNT_GROUP type.
+    // Empty string will not be processed, use cleared_fields during update operation to clear this field.
+    repeated string modes_account_groups = 16;
+
+    // Determines whether Pre-trade middle market price for an order is required.
+    optional bool require_pre_trade_mid_market_mark = 17;
+
+    // 18 is occupied by cleared_fields.
+
+    // Allows using of extended sides.
+    optional bool allow_extended_side = 19;
+}
+
+message RiskParameters
+{
+    // Trade routing account identifier.
+    // [obsolete] Use specific entity identifier on update message level.
+    optional sint32 obsolete_account_id = 1 [deprecated = true];
+
+    // [required] Allow positions to be closed only.
+    optional bool liquidation_only = 2;
+
+    // [required] Allow futures trading.
+    optional bool allow_futures = 3;
+
+    enum OptionsTrading
+    {
+        // Cannot buy or sell options.
+        NO = 1;
+
+        // Buy options or liquidate long option positions.
+        BUY = 2;
+
+        // Buy or Sell options.
+        ALL = 3;
+    }
+
+    // [required] Allow options trading.
+    // The value is associated with OptionsTrading enum.
+    optional uint32 allow_options = 4;
+
+    // [required] True if trade size limit is enforced.
+    optional bool enforce_trade_size_limit = 5;
+
+    // [obsolete] Use trade_size_limit field instead.
+    optional sint32 obsolete_trade_size_limit = 6 [deprecated = true];
+
+    // [required] True if trade margin limit is enforced.
+    optional bool enforce_trade_margin_limit = 7;
+
+    // Optional trade margin limit which is maximum margin requirement for any single trade.
+    optional double trade_margin_limit = 8;
+
+    // [required] True if trade price limit in ticks is enforced.
+    optional bool enforce_trade_price_limit_ticks = 9;
+
+    // Optional trade price limit in ticks for any single trade.
+    optional TradePriceLimit trade_price_limit_ticks = 10;
+
+    // [required] True if commodity position limit is enforced.
+    optional bool enforce_commodity_position_limit = 11;
+
+    // [obsolete] Use commodity_position_limit field instead.
+    optional LimitValue obsolete_commodity_position_limit = 12 [deprecated = true];
+
+    // [required] True if contract position limit is enforced.
+    optional bool enforce_contract_position_limit = 13;
+
+    // [obsolete] Use contract_position_limit field instead.
+    optional LimitValue obsolete_contract_position_limit = 14 [deprecated = true];
+
+    // [required] True if margin sybsystem parameters are enforced.
+    // When enforced, any trade that could cause margin requirements to exceed account's available funds is denied.
+    optional bool enforce_margin_subsystem_parameters = 15;
+
+    // Purchasing power parameters.
+    optional PurchasingPowerParameters purchasing_power_parameters = 16;
+
+    // [required] True if daily loss limit is enforced.
+    optional bool enforce_daily_loss_limit = 17;
+
+    // Optional daily loss limit. Limits losses during a single day.
+    // Account ending balance + collateral are considered as 'funds' for the limit.
+    // Losses during a single day are considered as 'losses' for the limit.
+    optional LossLimit daily_loss_limit = 18;
+
+    // [required] True if delta daily loss limit is enforced.
+    optional bool enforce_delta_daily_loss_limit = 19;
+
+    // Optional delta daily loss limit. Limits losses since yesterday.
+    // Yesterday's purchasing power is considered as 'funds' for the limit.
+    // Losses incurred since yesterday are considered as 'losses' for the limit.
+    optional LossLimit delta_daily_loss_limit = 20;
+
+    // [required] Maximum number of order requests (new orders, modifications, cancellations) allowed per second.
+    optional sint32 maximum_order_rate = 21;
+
+    // [required] Reject BUY MKT orders if ask price is not available and SELL MKT orders if bid price is not available.
+    optional bool reject_risky_market_orders = 22;
+
+    // [required] True if trade price limit in percent is enforced.
+    optional bool enforce_trade_price_limit_percent = 23;
+
+    // Optional trade price limit in percent for any single trade.
+    optional TradePriceLimitPercent trade_price_limit_percent = 24;
+
+    // Optional trade size limit for any single trade.
+    optional cqg.Decimal trade_size_limit = 25;
+
+    // Optional commodity position limit.
+    optional LimitValueDecimal commodity_position_limit = 26;
+
+    // Optional contract position limit.
+    optional LimitValueDecimal contract_position_limit = 27;
+
+    // Order placement date plus this number of days must be more than contract last trading date.
+    optional LimitValue last_trading_date_limit = 28;
+
+    // Trade size limit with unlimited/inherited mode.
+    // Unlimited/inherited modes aren't supported for account now.
+    optional LimitValueDecimal trade_size_limit_with_modes = 29;
+}
+
+// Account group.
+message AccountGroup
+{
+    // Group accounts relation enumeration.
+    enum RelationType
+    {
+        // Margin independently (sub accounts can borrow Purchasing Power from master up to configured %).
+        MARGIN_INDEPENDENTLY_BORROW = 1;
+
+        // Margin independently, then sum margin requirements and Purchasing Powers.
+        MARGIN_INDEPENDENTLY_SUM = 2;
+
+        // Margin master and sub-accounts together (combine funds, orders, and positions for margin calculations).
+        MARGIN_TOGETHER = 3;
+    }
+
+    // [required-update] Group identifier.
+    optional string group_id = 1;
+
+    // [required-create][immutable-update] Master of the group.
+    optional string master_account_id = 2;
+
+    // [required-create] Relation type.
+    // This field is associated with RelationType enum.
+    optional uint32 relation_type = 3;
+
+    // [immutable-update] Sub account of the group.
+    repeated SubAccount sub_accounts = 4;
+}
+
+// Sub account of group.
+message SubAccount
+{
+    // [required] Account identifier.
+    optional string account_id = 1;
+
+    // [immutable] Account name.
+    optional string account_name = 2;
+
+    // [immutable] Brokerage account number.
+    optional string brokerage_account_number = 3;
+
+    // [required-create] Purchasing power. Allowed values (0..1).
+    optional double purchasing_power_fraction = 4;
+}
+
+// Trade price limit parameters.
+message TradePriceLimit
+{
+    // This field is associated with PriceLimitMode enum.
+    optional uint32 mode = 1;
+
+    // [obsolete] Number of ticks away from the current market price to enforce the price limit.
+    optional sint32 obsolete_ticks = 2 [deprecated = true];
+
+    // Number of ticks away from the current market price to enforce the price limit.
+    optional LimitValue value = 3;
+}
+
+// Trade price limit parameters.
+message TradePriceLimitPercent
+{
+    // This field is associated with PriceLimitMode enum.
+    optional uint32 mode = 1;
+
+    // Percent from the current market price to enforce the price limit.
+    optional LimitValueDouble value = 2;
+}
+
+// Limit value in ticks.
+message LimitValue
+{
+    // This field is associated with LimitMode enum.
+    optional uint32 mode = 1;
+
+    // Limit value when mode is LIMITED.
+    optional sint32 value = 2;
+
+    // [obsolete] List of optional contract expiration based limits overrides.
+    repeated ExpirationLimit obsolete_expiration_limit = 3 [deprecated = true];
+
+    // Enforce all brokerage accounts to use this setting.
+    // Only applicable for Brokerage level configuration.
+    // Supported by LTD Limit.
+    optional bool enforce = 4;
+}
+
+// Limit value in double.
+message LimitValueDouble
+{
+    // This field is associated with LimitMode enum.
+    optional uint32 mode = 1;
+
+    // Limit value in double when mode is LIMITED.
+    optional double value = 2;
+
+    // Enforce all brokerage accounts to use this setting.
+    // Only applicable for Brokerage level configuration.
+    // Supported by next limits: margin_multiplier, last_trading_date_limit, long_positions_only.
+    optional bool enforce = 3;
+}
+
+// Limit value in decimal (can be used for trade size of position limit).
+message LimitValueDecimal
+{
+    // List of field ids to clear during update operation.
+    // Allows to clear expiration_limit field.
+    repeated uint32 cleared_fields = 5;
+
+    // This field is associated with LimitMode enum.
+    optional uint32 mode = 1;
+
+    // Limit value when mode is LIMITED.
+    optional cqg.Decimal value = 2;
+
+    // List of optional contract expiration based limits overrides.
+    // This list is used only for contract level position limit at the moment.
+    // Limits with lower number of days before expiration take over limits with bigger number of days before expiration
+    // when contract expiration reaches corresponding limit period.
+    repeated ExpirationLimitDecimal expiration_limit = 3;
+
+    // Enforce All brokerage accounts to use this setting.
+    // Only applicable for Brokerage level configuration.
+    // Supported by LTD Limit.
+    optional bool enforce = 4;
+
+    // 5 is occupied by cleared_fields.
+}
+
+// Limit value that can be true/false/default.
+message LimitValueBoolean
+{
+    // This field is associated with LimitMode enum. UNLIMITED is not supported.
+    optional uint32 mode = 1;
+
+    // Limit value when mode is LIMITED.
+    optional bool value = 2;
+
+    // Enforce All brokerage accounts to use this setting.
+    // Only applicable for Brokerage level configuration.
+    optional bool enforce = 3;
+}
+
+// [obsolete] Use ExpirationLimitDecimal message instead.
+message ExpirationLimit
+{
+    // Number of days before contract expiration this limit is in effect.
+    optional uint32 days_before_expiration = 1;
+
+    // Limit value when enforced.
+    optional sint32 value = 2;
+}
+
+// Contract expiration based limit.
+message ExpirationLimitDecimal
+{
+    // Number of days before contract expiration this limit is in effect.
+    optional uint32 days_before_expiration = 1;
+
+    // Limit value when enforced.
+    optional cqg.Decimal value = 2;
+}
+
+// Margin subsystem parameters.
+message PurchasingPowerParameters
+{
+    // Additional credit available to satisfy margin requirements.
+    optional double ms_allowable_margin_credit = 1;
+
+    // Cross margining indicator. If true then inter-month, inter-commodity and inter-exchange credits are considered in margin estimation.
+    optional bool ms_cross_margining = 2;
+
+    // Possible options to include different values into purchasing power.
+    enum IncludeOption
+    {
+        // Value is included.
+        YES = 1;
+
+        // Only negative value is included.
+        NEGATIVE = 2;
+
+        // Value is not included.
+        NO = 3;
+    }
+
+    // Include OTE (Open Trade Equity) in Purchasing Power (PP).
+    // This field is associated with IncludeOption enum.
+    optional uint32 ms_include_ote_pp = 3;
+
+    // Include NOV (Net Option Value) in Purchasing Power (PP).
+    // This field is associated with IncludeOption enum.
+    optional uint32 ms_include_nov_pp = 4;
+
+    // Include UPL (Unrealized Profit Loss) in DLL/DDLL (Daily Loss Limit and Delta Daily Loss Limit)
+    // This field is associated with IncludeOption enum.
+    optional uint32 include_upl_ll = 5;
+
+    // Include OTE (Open Trade Equity) in DLL/DDLL (Daily Loss Limit and Delta Daily Loss Limit)
+    // This field is associated with IncludeOption enum.
+    optional uint32 include_ote_ll = 6;
+
+    // Check for the negative balance.
+    optional bool check_negative_balance = 7;
+
+    // If true then OTE, NOV, and UPL can be calculated using theoretical values.
+    optional bool use_theo_prices = 8;
+
+    // Slippage for option theoretical price in ticks.
+    optional sint32 theo_ticks = 9;
+
+    // If true then Best Bid and Ask can be used for OTE calculation, only trade and settlement are used otherwise.
+    optional bool use_bba_ote = 10;
+
+    // If true then Best Bid and Ask can be used for NOV and UPL calculation, only trade and settlement are used otherwise.
+    optional bool use_bba_nov_upl = 11;
+
+    // Calculate current price as a settlement adjusted by net price change of reference contract, LME style.
+    optional bool adjust_price_by_netchange = 12;
+
+    // Use brokerage's configured margins instead of gateway's default ones.
+    // Using this option you are disabling cross-margining, even if it is enabled.
+    // Can be set if it is allowed on brokerage level only.
+    optional bool use_brokerage_margins_only = 13;
+
+    // [obsolete] Use margin_multiplier instead.
+    // Multiplier for calculated margin requirements. Allowed values (0.001..100).
+    optional double obsolete_margin_multiplier = 14 [deprecated = true];
+
+    // If true then margin is calculated independently for options using instrument_group_margin_multiplier.
+    optional bool ms_use_instrument_group_margin_multiplier = 15;
+
+    // Multiplier for calculated instrument group (options) margin requirements. Allowed values (0.001..100).
+    optional double ms_instrument_group_margin_multiplier = 16;
+
+    // Multiplier for calculated margin requirements. Allowed values (0.001..100).
+    // In update request you should use LimitMode.DEFAULT to reset this field.
+    optional LimitValueDouble margin_multiplier = 17;
+
+    // [optional] This parameter allows to ignore margin-based checks for liquidation orders.
+    // Any other risk checks that are enabled for this account
+    // will be conducted as usual even for liquidation orders.
+    optional bool always_allow_liquidation = 18;
+}
+
+// Loss limit.
+message LossLimit
+{
+    // Loss limit type enumeration.
+    // It defines what is used to get the limit absolute value during calculation.
+    enum Type
+    {
+        // Percentage of funds allowed in losses.
+        PERCENT = 1;
+
+        // Absolute amount allowed in losses, limited by funds.
+        AMOUNT = 2;
+
+        // Minimum from percent and absolute amount of funds allowed in losses.
+        MIN_PERCENT_AMOUNT = 3;
+
+        // Maximum from percent and absolute amount of funds allowed in losses.
+        MAX_PERCENT_AMOUNT = 4;
+
+        // Absolute amount of funds allowed in losses, and not limited by funds.
+        AMOUNT_NO_LIMIT = 5;
+    }
+
+    // This field is associated with Type enumeration.
+    optional uint32 type = 1;
+
+    // Percent of funds allowed in losses, entered as a fractional between 0 and 1.
+    optional double percent = 2;
+
+    // Absolute amount in US dollars allowed in losses.
+    optional double amount = 3;
+}
+
+// Exchange group with a list of commodities.
+message ExchangeGroup
+{
+    // Trade routing system identifier of an exchange group.
+    required sint32 id = 1;
+
+    // Name of the exchange group.
+    required shared_1.Text name = 2;
+
+    // List of exchange group fungible commodities.
+    repeated FungibleCommodity fungible_commodity = 3;
+}
+
+// Fungible commodity.
+message FungibleCommodity
+{
+    // Trade routing system identifier of the fungible commodity.
+    optional sint32 id = 1;
+
+    // Name of the fungible commodity.
+    optional shared_1.Text name = 2;
+
+    // List of tradable commodities.
+    repeated TradableCommodity tradable_commodity = 3;
+
+    // US commodity indicator.
+    optional bool is_us = 4;
+
+    // List of instrument types defined for this fungible commodity.
+    repeated sint32 instrument_type_id = 5;
+
+    // Synthetic ID of margin group.
+    optional string margin_group_id = 6;
+}
+
+// Tradable commodity.
+message TradableCommodity
+{
+    // Commodity string id (aka Commodity XBit).
+    required string id = 1;
+
+    // Commodity symbol.
+    required string symbol = 2;
+}
+
+// Instrument type.
+message InstrumentType
+{
+    // Trade routing system identifier of the instrument type.
+    required sint32 id = 1;
+
+    // Name of the instrument type.
+    required shared_1.Text name = 2;
+
+    // Different market limit types.
+    enum MarketLimitType
+    {
+        // Instrument position limit type.
+        INSTRUMENT_POSITION_LIMIT = 1;
+
+        // Contract position limit type.
+        CONTRACT_POSITION_LIMIT = 2;
+
+        // Trade size limit type.
+        TRADE_SIZE_LIMIT = 3;
+
+        // Trade price limit type.
+        TRADE_PRICE_LIMIT = 4;
+
+        // Trade price limit type.
+        LAST_TRADING_DATE_LIMIT = 5;
+
+        // Long positions only type.
+        LONG_POSITIONS_ONLY = 6;
+    }
+
+    // List of limit types that are acceptable for this instrument type.
+    // This filed is associated with MarketLimitType enum.
+    repeated uint32 allowed_limits = 3;
+
+    // Instrument group types.
+    enum InstrumentGroupType
+    {
+        // Futures.
+        FUTURES = 1;
+
+        // Options call/put.
+        OPTIONS = 2;
+
+        // All strategy types (calendar spreads, reduced tick calendar spreads, packs, strips, etc.).
+        STRATEGIES = 3;
+
+        // Indices.
+        INDICES = 4;
+
+        // Fixed Income.
+        FIXED_INCOME = 5;
+
+        // Cash Spot (including FX).
+        CASH_SPOT = 6;
+
+        // Daily Futures (relative/rolling prompts).
+        DAILY_FUTURES = 7;
+
+        // Equities.
+        EQUITIES = 8;
+    }
+
+    // Instrument group type id.
+    // This filed is associated with InstrumentGroupType enum.
+    optional uint32 instrument_group = 4;
+}
+
+// Market Limits set.
+// The general rules for using this result are:
+// - all fungible commodities with non-default limit(s) are returned (even those with no 'allowed to trade' tradable commodities);
+// - to determine if a tradable commodity is enabled (allowed to trade), first check tradable_commodity_id field;
+//   if the tradable commodity is not present there, use the next rule;
+// - if something is not specified on a lower level, check defaults at applicable higher levels
+//   (fungible commodity -> exchange group -> all US/non-US commodities -> all commodities).
+message MarketLimits
+{
+    // Allows to clear (set to default) all market limits (including trading authority) for provided level except all_market_limits.
+    repeated uint32 cleared_fields = 5;
+
+    // Default market limits for all commodities.
+    optional MarketLimitsRecord all_market_limits = 1;
+
+    // Default market limits for US commodities.
+    optional MarketLimitsRecord us_market_limits = 2;
+
+    // Default market limits for non-US commodities.
+    optional MarketLimitsRecord non_us_market_limits = 3;
+
+    // Default market limits for exchange groups.
+    repeated ExchangeMarketLimits exchange_market_limits = 4;
+
+    // 5 is occupied by cleared_fields.
+}
+
+// Record of market limit setting for exchange group level or higher.
+// Limit values are defaults for all included commodities and can be can be overridden on a lower level.
+message MarketLimitsRecord
+{
+    // Reserved for future use, not used now.
+    repeated uint32 cleared_fields = 4;
+
+    // Indicates if level is allowed to trade.
+    // If null (not set) - default, actual value inherited from upper level.
+    optional EntityAllowedToTrade allowed_to_trade = 1;
+
+    // [obsolete] Default margin multiplier. Allowed values (0.001..100).
+    // Use margin_multiplier = 5 instead.
+    optional double obsolete_margin_multiplier = 2 [deprecated = true];
+
+    // Default position and Trade limits.
+    optional PositionAndTradeLimits position_and_trade_limits = 3;
+
+    // 4 is occupied by cleared_fields.
+
+    // Margin multiplier for default and exchange levels. Allowed values (0.001..100).
+    // Can be enforced (locked) on FCM level.
+    optional LimitValueDouble margin_multiplier = 5;
+}
+
+// Set of position and trade limits for all possible levels.
+message PositionAndTradeLimits
+{
+    // Reserved for future use, not used now.
+    repeated uint32 cleared_fields = 12;
+
+    // [obsolete] Use commodity_position_limit field instead.
+    optional LimitValue obsolete_commodity_position_limit = 1 [deprecated = true];
+
+    // [obsolete] Use instrument_position_limit field instead.
+    optional LimitValue obsolete_instrument_position_limit = 2 [deprecated = true];
+
+    // [obsolete] Use contract_position_limit field instead.
+    optional LimitValue obsolete_contract_position_limit = 3 [deprecated = true];
+
+    // [obsolete] Use trade_size_limit field instead.
+    optional LimitValue obsolete_trade_size_limit = 4 [deprecated = true];
+
+    // Trade price limit (all price sources) (in ticks).
+    optional LimitValue trade_price_limit_ticks = 5;
+
+    // Trade price limit (all price sources) (in percent).
+    optional LimitValueDouble trade_price_limit_percent = 6;
+
+    // Trade price limits in ticks per price sources for continuous trading.
+    optional TradePriceLimitsTicks trade_price_limit_ticks_continuous = 7;
+
+    // Trade price limits in ticks per price sources for non-continuous trading.
+    optional TradePriceLimitsTicks trade_price_limit_ticks_non_continuous = 8;
+
+    // Trade price limits in percent per price sources for continuous trading.
+    optional TradePriceLimitsPercent trade_price_limit_percent_continuous = 9;
+
+    // Trade price limits in percent per price sources for non-continuous trading.
+    optional TradePriceLimitsPercent trade_price_limit_percent_non_continuous = 10;
+
+    // Order placement date plus this amount of days must be more than contract last trading date.
+    optional LimitValue last_trading_date_limit = 11;
+
+    // 12 is occupied by cleared_fields.
+
+    // Optional commodity position limit.
+    // It is not used (and does not make sense) on instrument type level of settings.
+    optional LimitValueDecimal commodity_position_limit = 13;
+
+    // Instrument position limit.
+    // It is not applicable for some instrument types.
+    optional LimitValueDecimal instrument_position_limit = 14;
+
+    // Contract position limit.
+    // It is not applicable for some instrument types.
+    optional LimitValueDecimal contract_position_limit = 15;
+
+    // Trade size limit.
+    // It is not applicable for some instrument types.
+    optional LimitValueDecimal trade_size_limit = 16;
+
+    // Indicates if selling before buying is restricted on level.
+    // If null (not set) - default, actual value inherited from upper level.
+    optional LimitValueBoolean long_positions_only = 17;
+}
+
+// Trade price limits in ticks per price sources.
+message TradePriceLimitsTicks
+{
+    // Bid/Ask price source.
+    optional LimitValue bid_ask = 1;
+
+    // The last trade price source.
+    // Not used for non-continuous trading.
+    optional LimitValue last = 2;
+
+    // Open (for continuous) price source - the first trading price at the beginning of the trading day.
+    // Indicative open (for non-continuous) price source - the proposed open price at the beginning of the next trading day.
+    optional LimitValue open = 3;
+
+    // Settlement price source - an official price established at the end of each trading day.
+    optional LimitValue settlement = 4;
+}
+
+// Trade price limits in percent per price sources.
+message TradePriceLimitsPercent
+{
+    // Bid/Ask price source.
+    optional LimitValueDouble bid_ask = 1;
+
+    // The last trade price source.
+    // Not used for non-continuous trading.
+    optional LimitValueDouble last = 2;
+
+    // Open (for continuous) price source - the first trading price at the beginning of the trading day.
+    // Indicative open (for non-continuous) price source - the proposed open price at the beginning of the next trading day.
+    optional LimitValueDouble open = 3;
+
+    // Settlement price source - an official price established at the end of each trading day.
+    optional LimitValueDouble settlement = 4;
+}
+
+// Exchange group level limits.
+message ExchangeMarketLimits
+{
+    // Allows to clear (set to default) all limits on exchange level (default_market_limits) and below (commodity_market_limits).
+    repeated uint32 cleared_fields = 4;
+
+    // Trade routing system identifier of an exchange group.
+    // Can be obtained via AccountAvailableExchangeGroupsRequest.
+    // Corresponds to ExchangeGroup.id field.
+    required sint32 exchange_group_id = 1;
+
+    // Default exchange group level limits.
+    optional MarketLimitsRecord default_market_limits = 2;
+
+    // List of fungible commodity level limits.
+    repeated CommodityMarketLimits commodity_market_limits = 3;
+
+    // 4 is occupied by cleared_fields.
+}
+
+// Fungible commodity level limits.
+message CommodityMarketLimits
+{
+    // Allows to clear (set to default) all limits of this commodity level and below (instrument_market_limits).
+    repeated uint32 cleared_fields = 6;
+
+    // Fungible commodity ID.
+    // Can be obtained via AccountAvailableExchangeGroupsRequest.
+    // Corresponds to FungibleCommodity.id field.
+    required sint32 fungible_commodity_id = 1;
+
+    // [obsolete] List of allowed to trade tradable commodity ids.
+    repeated string obsolete_tradable_commodity_id = 2 [deprecated = true];
+
+    // Default commodity level position and Trade limits.
+    optional PositionAndTradeLimits position_and_trade_limits = 3;
+
+    // List of instrument type level limits.
+    repeated InstrumentMarketLimits instrument_market_limits = 4;
+
+    // List of non-default allowed to trade configuration of commodities.
+    // EntityAllowedToTrade.id is commodity_id (aka XBit).
+    repeated EntityAllowedToTrade allowed_to_trade_commodities = 5;
+
+    // 6 is occupied by cleared_fields.
+
+    // [optional] Commodity margin multiplier. Allowed values (0.001..100).
+    // It is applied to all commodities with same margin_group_id even if specified only for one commodity from the group.
+    // Can be enforced (locked) on FCM level.
+    optional LimitValueDouble margin_multiplier = 7;
+}
+
+// Instrument type level limits.
+message InstrumentMarketLimits
+{
+    // Allows to clear (set to default) all limits of this instrument.
+    repeated uint32 cleared_fields = 5;
+
+    // ID of the instrument type.
+    // Can be obtained via AccountAvailableExchangeGroupsRequest.
+    // Corresponds to InstrumentType.id field.
+    required sint32 instrument_type_id = 1;
+
+    // Instrument type level position and Trade limits.
+    optional PositionAndTradeLimits position_and_trade_limits = 2;
+
+    // List of non-default allowed to trade configuration of commodities.
+    repeated EntityAllowedToTrade allowed_to_trade_commodities = 3;
+
+    // List of non-default allowed to trade configuration of contracts.
+    repeated EntityAllowedToTrade allowed_to_trade_contracts = 4;
+
+    // 5 is occupied by cleared_fields.
+}
+
+// Represents any entity that can be allowed/disallowed to trade.
+message EntityAllowedToTrade
+{
+    // Allows to clear allowed_to_trade field.
+    repeated uint32 cleared_fields = 4;
+
+    // Entity identifier. Can be ID of commodity or contract.
+    // Commodity ID can be obtained via AccountAvailableExchangeGroupsRequest
+    // and corresponds to TradableCommodity.id field.
+    optional string id = 1;
+
+    // Indicates if entity is allowed to trade.
+    // Values: null (not set) - default, actual value inherited from upper level.
+    //         false - explicitly disallowed, no matter what value is on upper level.
+    //         true - explicitly allowed, no matter what value is on upper level.
+    optional bool allowed_to_trade = 2;
+
+    // Enforce All brokerage accounts to use this setting.
+    // Only applicable for Brokerage level configuration.
+    optional bool enforce = 3;
+
+    // 4 is occupied by cleared_fields.
+}
+
+// Contract positions.
+message ContractPosition
+{
+    // Contract symbol (Full contract name).
+    required string symbol = 1;
+
+    // True if open positions are short (result of sell operations), long otherwise.
+    required bool is_short_open_position = 2;
+
+    // List of open positions.
+    // There could be more than one position per contract separating contributed trades on different price levels.
+    repeated OpenPosition open_position = 3;
+
+    // Contract id in case of grouping by contract.
+    optional string contract_id = 4;
+}
+
+// Contract open position.
+message OpenPosition
+{
+    enum PositionStatus
+    {
+        POSITION = 1;
+        WORKING_ORDER = 2;
+    }
+
+    // [obsolete] Use qty field instead.
+    optional uint32 obsolete_qty = 2 [deprecated = true];
+
+    // Position average price.
+    // NOTE: Since it could be an aggregated position price is sent in correct format directly.
+    required double price = 3;
+
+    // Exchange specific trade date when the position was open or last changed (date only value).
+    required sint64 trade_date = 4;
+
+    // Statement date (date value only).
+    required sint64 statement_date = 5;
+
+    // UTC trade time (including date) if available, it might not be available e.g. for the previous day or aggregated positions.
+    optional sint64 trade_utc_time = 6;
+
+    // Position ID (status=POSITION) or order request ID (status=WORKING_ORDER)
+    // associated with the position (if statement hasn't run yet).
+    optional string position_id = 7;
+
+    // Indicates whether it is 'start of the day' or 'intraday' (working order) position.
+    // The value is associated with OpenPosition.PositionStatus enum.
+    optional uint32 status = 8;
+
+    // [required] Position size, zero means that this position is deleted.
+    optional cqg.Decimal qty = 9;
+
+    // Currency code of position (ISO 4217 based).
+    optional string currency_code = 10;
+
+    // Position speculation type.
+    // This field is associated with OrderChain.SpeculationType enum type.
+    optional uint32 speculation_type = 11;
+
+    // Associated order chain in case of status = WORKING_ORDER.
+    optional string order_chain_id = 12;
+
+    // Position display price.
+    optional sint64 display_price = 13;
+}
+
+// Equity.
+message Equity
+{
+    // Currency code of equity values (ISO 4217 based).
+    required string currency = 1;
+
+    // Securities on deposit. Margin security values net of haircut.
+    required double securities = 2;
+
+    // Cash Balance excluding open futures profits/losses, option market values, and securities on deposit.
+    required double balance = 3;
+
+    // Total open trade equity. Open profits/losses on all futures positions.
+    required double ote = 4;
+
+    // Ending balance + total open trade equity.
+    required double total_equity = 5;
+
+    // Mark to market value of option positions.
+    required double mvo = 6;
+
+    // Total equity + option market value + securities.
+    required double total_value = 7;
+
+    // Liquid funds available -- can be withdrawn from account.
+    optional double cash_excess = 8;
+
+    // Implied initial margin requirement.
+    // Equity required to establish current positions based on margin requirements.
+    optional double initial_margin = 9;
+
+    // Implied maintenance margin requirement.
+    // Minimum equity required to maintain current positions based on margin requirements.
+    optional double maint_margin = 10;
+
+    // The sum of total equity and securities on deposit.
+    optional double posted_margin = 11;
+}
+
+// Collateral (margin details).
+message Collateral
+{
+    // Currency code of margin and PP values (ISO 4217 based).
+    required string currency = 4;
+
+    // Current total margin.
+    required double total_margin = 5;
+
+    // Available account funds including balance, realized profit (or loss), collateral and credits.
+    // NOTE: OTE and MVO are not included, regardless of account risk parameters.
+    required double purchasing_power = 6;
+}
+
+// Information about one of the found orders.
+message OrderSearchResultRecord
+{
+    // Brokerage account number.
+    required string brokerage_account_number = 1;
+
+    // Order ID.
+    required string order_id = 2;
+
+    // Ticket number.
+    optional string ticket_number = 3;
+
+    // Order side.
+    // The value is associated with OrderChain.Side enum.
+    required uint32 side = 4;
+
+    // Order type.
+    // The value is associated with OrderChain.OrderType enum.
+    required uint32 type = 5;
+
+    // Order limit price.
+    // Correct price format.
+    optional double limit_price = 6;
+
+    // Order stop price.
+    // Correct price format.
+    optional double stop_price = 7;
+
+    // Contract name.
+    required string contract_name = 8;
+
+    // Time when order was submitted to execution system (UTC).
+    required sint64 submitted_utc_time = 9;
+
+    // Order status.
+    // This field is associated with OrderChain.Status enum type.
+    required uint32 status = 10;
+
+    // User name.
+    optional string user_name = 11;
+
+    // Last name of customer to whom belongs login that placed the order.
+    optional string customer_last_name = 12;
+
+    // Brokerage name.
+    required string brokerage_name = 13;
+
+    // Route name.
+    required string route_name = 14;
+
+    // Trade routing account identifier.
+    required sint32 account_id = 15;
+
+    // Account name.
+    required string account_name = 16;
+
+    // Native route name.
+    optional string native_route_name = 17;
+
+    // Route client order ID.
+    required string route_client_order_id = 18;
+
+    // Exchange name.
+    required string exchange_name = 19;
+
+    // Chain order id.
+    optional string chain_order_id = 20;
+
+    // Limit price of the order.
+    // Display price format.
+    optional sint64 display_limit_price = 21;
+
+    // Stop price of the order.
+    // Display price format.
+    optional sint64 display_stop_price = 22;
+
+    // [obsolete] Use size field instead.
+    optional uint32 obsolete_size = 23 [deprecated = true];
+
+    // Sales series number.
+    optional string sales_series_number = 24;
+
+    // Sales series name.
+    optional string sales_series_name = 25;
+
+    // Id of sales series.
+    // Use profile_sales_series_id instead.
+    optional string sales_series_id = 26;
+
+    // Total positive size of the order.
+    optional cqg.Decimal size = 27;
+
+    // Profile id of sales series.
+    optional string profile_sales_series_id = 28;
+
+    // Order extended side.
+    // This field is associated with ExtendedSide enum type.
+    optional uint32 extended_side = 29;
+}
+
+// [obsolete] Account cluster.
+message AccountCluster
+{
+    // [immutable] Account cluster id.
+    // Omit the value during account cluster creation.
+    optional string id = 1;
+
+    // [required-create][immutable-update] Brokerage id the cluster points to.
+    optional string brokerage_id = 2;
+
+    // [required] Cluster name (max length = 256).
+    optional string name = 3;
+
+    // [required] True if the cluster is removed.
+    // Set the value to true during update to remove this account cluster.
+    optional bool is_removed = 4;
+}
+
+// [obsolete] Account cluster price offsets per commodity and instrument type.
+message AccountClusterPriceOffset
+{
+    // List of field ids to clear during update operation.
+    repeated uint32 cleared_fields = 7;
+
+    // [required] Commodity string id (aka Xbit).
+    optional string commodity_id = 1;
+
+    // [required] Trade routing system identifier of the instrument type.
+    optional sint32 instrument_type_id = 2;
+
+    // [required-create] Price offset in ticks.
+    optional sint32 price_offset_ticks = 3;
+
+    // Hedge order price offset in ticks.
+    // Provide the field id in cleared_fields to reset the value during update operation.
+    optional sint32 hedge_offset_ticks = 4;
+
+    // List of execution instructions for hedge order.
+    // Each field value is associated with OrderChain.ExecInstruction enum type.
+    // Provide the field id in cleared_fields to reset the value during update operation.
+    repeated uint32 hedge_exec_instruction = 5;
+
+    // Visible quantity of hedge iceberg order in percent.
+    // The parameter is applied for hedge order with ICEBERG execution instruction.
+    // Provide the field id in cleared_fields to reset the value during update operation.
+    optional uint32 iceberg_visible_qty_percent = 6;
+}
+
+// Represents available route.
+message AvailableRoute
+{
+    // Route common information.
+    optional RouteInformation route_information = 1;
+
+    // Route priority.
+    optional uint32 priority = 2;
+
+    enum OmnibusSupportType
+    {
+        PROHIBITED = 1;
+
+        ALLOWED = 2;
+
+        REQUIRED = 3;
+    }
+
+    // This filed is associated with OmnibusSupportType enum.
+    optional uint32 omnibus_support_type = 3;
+
+    // Available omnibus accounts for the route.
+    repeated RouteOmnibusAccount omnibus_accounts = 4;
+}
+
+// Represents omnibus account, configured on the route.
+message RouteOmnibusAccount
+{
+    // Omnibus account id.
+    optional string account_id = 1;
+
+    // Omnibus account name.
+    optional string account_name = 2;
+
+    // Omnibus brokerage account name.
+    optional string brokerage_account_number = 3;
+
+    // Omnibus account priority.
+    optional uint32 priority = 4;
+}
+
+// Represents route common information.
+message RouteInformation
+{
+    // Code number of the route.
+    optional string route_code = 1;
+
+    // Route name.
+    optional string route_name = 2;
+
+    // If set, synthetic strategies are allowed.
+    optional bool synthetic_strategies = 3;
+
+    // List of available route attributes.
+    repeated AccountRouteAttribute attributes = 4;
+
+    // [obsolete] If set, route has overlapped instruments.
+    optional bool obsolete_has_overlapped_instruments = 5 [deprecated = true];
+
+    // [immutable] If set, account requires authorization to use this route.
+    optional bool authorization_required = 6;
+
+    // [immutable] Indicates whether this route supports synthetic orders.
+    optional bool allow_synthetic_order_types = 7;
+
+    // List of available route algorithmic strategies allowed on particular route.
+    repeated RouteAlgoStrategy route_algo_strategies = 8;
+
+    // [immutable] If set, account requires primary trade-routing login enabled to use this route.
+    // Only one route with enabled this flag can be enabled on account.
+    optional bool primary_login_required = 9;
+}
+
+// Route algorithmic strategy.
+message RouteAlgoStrategy
+{
+    // [required][immutable] Algorithmic strategy identifier allowed on particular route.
+    optional string id = 1;
+
+    // [required][immutable] Algorithmic strategy name.
+    optional shared_1.Text name = 2;
+
+    // [required][immutable] Removed flag.
+    optional bool removed = 3;
+}
+
+// Restore account.
+message RestoreAccount
+{
+    // [required] Account id to restore.
+    optional string account_id = 1;
+}
+
+// Account type overrides per exchange list.
+message AccountTypeOverrideListRequest
+{
+    // [required] Account id to get type overrides.
+    optional string account_id = 1;
+}
+
+// Update account type overrides list.
+message UpdateAccountTypeOverrideList
+{
+    // [required] Account id to update type overrides.
+    optional string account_id = 1;
+
+    // Overrides to add or change.
+    repeated AccountTypeOverride overrides_to_set = 2;
+
+    // Overrides to remove from account.
+    // First - login id, second - exchange id.
+    repeated common_1.Tuple overrides_to_remove = 3;
+}
+
+// Result of RestoreAccount.
+message RestoreAccountResult
+{
+    // If message is received then operation was successfully.
+}
+
+// Result of AccountTypeOverrideListRequest.
+message AccountTypeOverrideListResult
+{
+    // Account type overrides.
+    repeated AccountTypeOverride overrides = 1;
+}
+
+// Represents account type override per exchange.
+// Exchange ID + trade routing login ID pair is unique.
+message AccountTypeOverride
+{
+    // [required] Exchange identifier.
+    // LookupPropertyListRequest { property_type = common_1.CommonLookupPropertyType.EXCHANGE }
+    optional string exchange_id = 2;
+
+    // Possible affected login.
+    // If not provided, all logins are affected.
+    optional string login_id = 3;
+
+    // [required] Account type override.
+    // LookupPropertyListRequest { property_type = TradeRoutingLookupPropertyType.ACCOUNT_TYPE }
+    optional string type_id = 4;
+
+    // [required] Account origin override.
+    // LookupPropertyListRequest { property_type = TradeRoutingLookupPropertyType.ACCOUNT_ORIGIN }
+    optional string origin_id = 5;
+}
+
+// Result of UpdateAccountTypeOverrideList.
+message UpdateAccountTypeOverrideListResult
+{
+    // If message is received then operation was successfully.
+}
+
+// Update account user authorization list operation.
+message UpdateAccountUserAuthorizationList
+{
+    // Links to add or modify.
+    // Authorization is added if it does not exist with this account and user id, it is updated otherwise.
+    repeated AccountUserLink links_to_set = 1;
+
+    // Links to remove. First - account id, second - user id.
+    repeated common_1.Tuple links_to_remove = 2;
+}
+
+// Result of account user authorization list update.
+message UpdateAccountUserAuthorizationListResult
+{
+    // If message is received then authorizations was updated successfully.
+}
+
+// Remove account.
+message RemoveAccount
+{
+    // [required] Account id to remove.
+    optional string account_id = 1;
+}
+
+// Result of RemoveAccount.
+message RemoveAccountResult
+{
+    // If message is received then operation was successfully.
+}
+
+// Gets available to account Service Groups according to enabled routes.
+message AccountAvailableServiceGroupListRequest
+{
+    // [required] Account id.
+    optional string account_id = 1;
+}
+
+// Gets account's enabled Service Groups.
+message AccountServiceGroupListRequest
+{
+    // [required] Account id.
+    optional string account_id = 1;
+}
+
+// Updates list of account's enabled Service Groups.
+message UpdateAccountServiceGroupList
+{
+    // [required] Account id.
+    optional string account_id = 1;
+
+    // Service Groups to enable
+    repeated string service_group_ids_to_set = 2;
+
+    // Service Groups to remove from account.
+    repeated string service_group_ids_to_remove = 3;
+}
+
+// Result of AccountAvailableServiceGroupListRequest.
+message AccountAvailableServiceGroupListResult
+{
+    // Currently available to account Service Group list.
+    repeated ServiceGroup service_groups = 1;
+}
+
+// Represents Service Group entity.
+message ServiceGroup
+{
+    // [required][immutable] Service Group's id.
+    optional string id = 1;
+
+    // [required][immutable] Name.
+    optional string name = 2;
+
+    // [required][immutable] Removed flag.
+    optional bool removed = 3;
+}
+
+// Result of AccountServiceGroupListRequest.
+message AccountServiceGroupListResult
+{
+    // Enabled Service Groups.
+    repeated string service_group_ids = 1;
+}
+
+// Result of UpdateAccountServiceGroupList.
+message UpdateAccountServiceGroupListResult
+{
+    // If message is received then operation was successfully.
+}
+
+// Gets billable exchanges available to the current admin login.
+message BillableExchangeListRequest
+{
+}
+
+// Result of BillableExchangeListRequest.
+message BillableExchangeListResult
+{
+    repeated BillableExchange billable_exchanges = 1;
+}
+
+message BillableExchange
+{
+    // [required] Billable Exchange's id.
+    optional string number = 1;
+
+    // [required] Name.
+    optional string name = 2;
+
+    // [required] Description.
+    optional string description = 3;
+
+    // [required] Service Groups authorization level (Amount Allowed per Exchange).
+    // This field is associated with ServiceGroupAuthorizationLevel enum.
+    optional uint32 service_group_authorization_level = 4;
+
+    // Linked Service Groups.
+    repeated string service_group_ids = 5;
+}
+
+message CreateAccountGroup
+{
+    optional AccountGroup new_account_group = 1;
+}
+
+message CreateAccountGroupResult
+{
+    // Created account group id.
+    optional string new_account_group_id = 1;
+}
+
+message UpdateAccountGroup
+{
+    // [required] Account group to update.
+    optional AccountGroup account_group = 1;
+
+    // Sub-accounts to add/update.
+    repeated SubAccount sub_accounts_to_set = 2;
+
+    // Sub-accounts to remove.
+    repeated string sub_account_ids_to_remove = 3;
+}
+
+message RemoveAccountGroup
+{
+    // [required] Account group id to remove.
+    optional string account_group_id = 1;
+}
+
+message DeleteAccountPositions
+{
+    // ID of the account with positions data to delete.
+    // Mutually exclusive with position_ids field.
+    optional string account_id = 1;
+
+    // Specific position identifiers to delete.
+    // Mutually exclusive with account_id field.
+    repeated string position_ids = 2;
+}
+
+////------------------------------------------
+//// Enumerations
+
+// Types of trade routing related lookup properties.
+enum TradeRoutingLookupPropertyType
+{
+    // Type of the account (e.g. 'Customer Account', 'House Account', etc.)
+    ACCOUNT_TYPE = 101;
+
+    // MODES Account groups type.
+    MODES_ACCOUNT_GROUP = 102;
+
+    // Time zones.
+    TIME_ZONE = 103;
+
+    // Risk server instances.
+    RISK_SERVER_INSTANCE = 104;
+
+    // Trade locations.
+    TRADE_LOCATION = 105;
+
+    // Order classes.
+    ORDER_CLASS = 106;
+
+    // Account origin ('Customer', 'firm', etc. )
+    ACCOUNT_ORIGIN = 107;
+
+    // Execution source codes that can be used for Account-Login link.
+    EXECUTION_SOURCE_CODE = 108;
+}
+
+// Price limit mode enumeration.
+enum PriceLimitMode
+{
+    // Trade price limit check is enforced only for orders subject to immediate execution. Check LMT only.
+    AGGRESSIVE_LMT = 1;
+
+    // Trade price limit check is enforced only for orders subject to immediate execution. Check LMT and STP.
+    AGGRESSIVE_LMT_STP = 2;
+
+    // Trade price limit check is enforced for all orders. Check LMT only.
+    ALL_LMT = 3;
+
+    // Trade price limit check is enforced for all orders. Check LMT and STP.
+    ALL_LMT_STP = 4;
+}
+
+// Limit mode.
+enum LimitMode
+{
+    // Limit is inherited from a parent entity.
+    DEFAULT = 1;
+
+    // Limit is not enforced.
+    UNLIMITED = 2;
+
+    // Limit is enforced.
+    LIMITED = 3;
+}
+
+enum ServiceGroupAuthorizationLevel
+{
+    // No additional authorization is required. Product enablement enables linked Service Groups.
+    NONE = 0;
+
+    // Only one Service Group for the exchange is possible to enable at the same time.
+    // If nothing is enabled then there is no authorization to see/trade linked products.
+    ONE_REQUIRED = 1;
+
+    // One or more Service Group can be enabled at the same time.
+    // If nothing is enabled then there is no authorization to see/trade linked products.
+    ANY_REQUIRED = 2;
+}
+
+// List of possible extended sides.
+enum ExtendedSide
+{
+    EXTENDED_SIDE_BUY = 1;
+    EXTENDED_SIDE_SELL = 2;
+    EXTENDED_SIDE_SELL_SHORT = 5;
+    EXTENDED_SIDE_SELL_SHORT_EXEMPT = 6;
+}

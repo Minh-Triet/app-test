@@ -1,0 +1,810 @@
+// CQG Customer Management System API Protocol.
+//
+// Protocol time attributes are 64-bit signed integers that contain offset in milliseconds from 01.01.1970 (unix timestamp).
+//
+// The following attributes are used in comments to describe fields specifics:
+// 1. [immutable] - field is ignored via any operation message.
+// 2. [obsolete] - field is obsolete and candidate for remove in some next protocol version.
+// 3. [required] - field is required for any operation message, even if it is marked as optional.
+// Attribute can be additionally amended with operation name it is applied for. For example:
+// [required-create] - field is required for create message only.
+//
+// Protocol constants:
+// DEFAULT_RESULT_RECORDS_NUMBER = 1000.
+//
+// Last changes were made on 05 Aug 2021
+// Version 1.31
+
+syntax = "proto2";
+
+import "common/shared_1.proto";
+import "CMS/common_1.proto";
+import "CMS/traderouting_1.proto";
+
+package cmsapi_1;
+
+enum ProtocolVersion
+{
+    // Major number change is required for backward incompatible protocol versions (new 'proto' file is necessary)
+    PROTOCOL_VERSION_MAJOR = 1;
+    // Minor number is increased for backward compatible protocol versions when new messages and/ or fields are
+    // added without removing/ changing any existing messages and fields (new 'proto' file is not created)
+    PROTOCOL_VERSION_MINOR = 27;
+}
+
+////------------------------------------------
+//// Client Messages
+
+// Client to Server message, must include at least one field.
+// Logon is required to be the first message after connection.
+// Rate of incoming requests (sum of different requests within messages) is limited,
+// maximum 1000 requests for 20 seconds period is allowed by default.
+// NOTE: This and other limits mentioned in this protocol are not guaranteed; they are given for reference only
+// and are subject to change without prior notice.
+message ClientMessage
+{
+    // Session related messages.
+    // Only one session related message is expected in ClientMessage (it should not be combined with other messages).
+    optional common_1.Logon logon = 1;
+    optional common_1.Logoff logoff = 2;
+    optional common_1.RestoreOrJoinSession restore_or_join_session = 7;
+
+    // Information request.
+    repeated InformationRequest information_request = 3;
+
+    // Search request.
+    repeated SearchRequest search_request = 4;
+
+    // Operation request.
+    repeated OperationRequest operation_request = 5;
+
+    // Trade routing related operations.
+    repeated traderouting_1.TradeRoutingRequest trade_routing_request = 6;
+
+    // Ping request initiated by client.
+    optional Ping ping = 9;
+
+    // Pong message in response to server Ping.
+    optional Pong pong = 10;
+
+    // Request to cancel previously deferred request
+    optional CancelDeferredRequest cancel_deferred_request = 11;
+
+    // Reserved for internal use.
+    extensions 100 to 199;
+}
+
+// Information request message.
+// One of the operational request fields is expected.
+message InformationRequest
+{
+    // Request identifier.
+    // It should be unique to match with operation result.
+    required uint32 id = 1;
+
+    // Request of user information.
+    optional common_1.UserInfoRequest user_info_request = 2;
+
+    // Request of user's entitlements.
+    optional common_1.UserEntitlementServiceRequest user_entitlement_service_request = 3;
+
+    // Request of entitlement categories.
+    optional common_1.EntitlementCategoryListRequest entitlement_category_list_request = 4;
+
+    // Request of entitlement service information.
+    optional common_1.EntitlementServiceRequest entitlement_service_request = 5;
+
+    // Request of profile information.
+    optional ProfileRequest profile_request = 6;
+
+    // Request for all services list.
+    optional common_1.EntitlementServiceListRequest entitlement_service_list_request = 7;
+
+    // Request of unique username
+    optional GetUniqueUsernameRequest get_unique_username_request = 8;
+
+    // Customer to sales series links request.
+    optional common_1.CustomerSalesSeriesAuthorizationListRequest customer_sales_series_authorization_list_request = 9;
+
+    // Login additional settings request.
+    optional common_1.LoginSettingsRequest login_settings_request = 10;
+
+    // Requests login's member ids.
+    // Supported login domains: trade-routing.
+    optional common_1.LoginExchangeMemberIdListRequest login_exchange_member_id_list_request = 11;
+
+    // Get a list of lookup properties.
+    // Lookup Property types are defined by CommonLookupPropertyType enum.
+    optional common_1.LookupPropertyListRequest lookup_property_list_request = 12;
+
+    // Get list of authentication partners.
+    optional AuthPartnerListRequest auth_partner_list_request = 13;
+
+    // Request of login billing custom data.
+    optional common_1.LoginBillingCustomDataRequest login_billing_custom_data_request = 14;
+}
+
+// Request message to search for information.
+// One optional field is expected.
+// By default result contains at most DEFAULT_RESULT_RECORDS_NUMBER records.
+// Set parameter top to a larger number to receive more.
+message SearchRequest
+{
+    // Request identifier.
+    // It should be unique to match with operation result.
+    required uint32 id = 1;
+
+    // Optionally restrict matched results by returning the first 'top' records.
+    optional uint32 top = 2;
+
+    // Search for users.
+    optional common_1.UserSearchRequest user_search_request = 3;
+
+    // Search for profiles.
+    optional ProfileSearchRequest profile_search_request = 4;
+
+    // [obsolete] Use ProfileSearchRequest instead.
+    optional common_1.SalesSeriesSearchRequest obsolete_sales_series_search_request = 5 [deprecated=true];
+
+    // Determines whether removed entities are included in search result.
+    optional bool include_removed = 6 [default = false];
+}
+
+// Operation request message.
+// One of the request fields is expected.
+// Create operations ignore entity id fields (set it to an empty string).
+// Update operations use entity id fields as a key to update corresponding entities.
+// Also update operations have optional original entity fields (last know information before changes).
+// If the original entity is specified then it is used to identify which fields are updated and
+// which stay untouched so to update only fields that are different from the provided original.
+// Update operation does not fail if some of the updated fields have been changed already.
+// This means that if two clients change the same entity field at the same time then the last one is set
+// but if two clients change different fields of this entity at the same time then both changes are applied.
+message OperationRequest
+{
+    // Request identifier.
+    // It should be unique to match with operation result.
+    required uint32 id = 1;
+
+    // Clone template or regular user.
+    // Supported login domains: trade-routing.
+    optional common_1.CloneUser clone_user = 2;
+
+    // Create profile.
+    optional CreateProfile create_profile = 3;
+
+    // Update profile.
+    optional UpdateProfile update_profile = 4;
+
+    // Remove profile.
+    optional RemoveProfile remove_profile = 5;
+
+    // Create user.
+    optional common_1.CreateUser create_user = 6;
+
+    // Update user.
+    optional common_1.UpdateUser update_user = 7;
+
+    // Remove user.
+    optional common_1.RemoveUser remove_user = 8;
+
+    // [re-]link login to a profile.
+    // Supported profile types: admin, customer.
+    optional LinkLoginToProfile link_user_to_profile = 9;
+
+    // Modify the list of user entitlement services.
+    optional common_1.ModifyUserEntitlementService modify_user_entitlement_service = 10;
+
+    // Send welcome e-mail to profile.
+    // Supported profile types: admin, customer.
+    optional SendWelcomeEmail send_welcome_email = 11;
+
+    // Restore user.
+    optional common_1.RestoreUser restore_user = 12;
+
+    // Restore profile.
+    optional RestoreProfile restore_profile = 13;
+
+    // Update customer to sales series authorization list operation.
+    optional common_1.UpdateCustomerSalesSeriesAuthorizationList update_customer_sales_series_authorization_list = 14;
+
+    // Update login exchange member id list.
+    // Supported login domains: trade-routing.
+    optional common_1.UpdateLoginExchangeMemberIdList update_login_exchange_member_id_list = 15;
+
+    // Update Login settings.
+    optional common_1.UpdateLoginSettings update_login_settings = 16;
+
+    // Activate login operation.
+    // Supported login domains: trade-routing.
+    optional common_1.ActivateLogin activate_login = 17;
+
+    // Deactivate login operation.
+    // Supported login domains: trade-routing.
+    optional common_1.DeactivateLogin deactivate_login = 18;
+
+    // Send credential reset email.
+    // Supported login domains: trade-routing, admin.
+    optional SendCredentialResetEmail send_credential_reset_email = 19;
+
+    // Generate a service security token for a special AuthServer operation.
+    // Supported login domains: trade-routing, admin.
+    optional GenerateServiceSecurityToken generate_service_security_token = 20;
+
+    // Erases current credentials of specified types.
+    // Supported login domains: trade-routing, admin.
+    optional common_1.EraseCurrentCredentials erase_current_credentials = 21;
+
+    // Supported login domains: trade-routing, admin.
+    optional TerminateLoginSession terminate_login_session = 22;
+
+    // Update login billing custom data.
+    // Supported login domains: trade-routing.
+    optional common_1.UpdateLoginBillingCustomData update_login_billing_custom_data = 23;
+}
+
+// Request used to cancel previously sent request that was deferred in Waiting Queue
+// Only next requests can be deferred and canceled:
+//    cmsapi.InformationRequest
+//    cmsapi.OperationRequest
+//    cmsapi.SearchRequest
+//    trapi.TradeRoutingRequest
+// Requests cancelation is available only if client was logged on or join session
+// with subscribe_on_request_status_change flag set to true.
+// If request with this tracking_number is not present in Waiting Queue or it was initiated from
+// another connection than it will not be canceled
+message CancelDeferredRequest
+{
+    // Request identifier
+    // it should be unique to match with operation result
+    optional uint32 id = 1;
+
+    // Tracking Number of request to be canceled from Waiting Queue
+    optional uint64 tracking_number = 2;
+}
+
+////------------------------------------------
+//// Server Messages.
+
+// Server to Client message.
+message ServerMessage
+{
+    // Session level messages results.
+    optional common_1.LogonResult logon_result = 1;
+    optional common_1.LoggedOff logged_off = 2;
+    optional common_1.RestoreOrJoinSessionResult restore_or_join_session_result = 8;
+
+    // Result of information request.
+    repeated InformationResult information_result = 3;
+
+    // Result of search request.
+    repeated SearchResult search_result = 4;
+
+    // Result of operation request.
+    repeated OperationResult operation_result = 5;
+
+    // Trade routing operation results.
+    repeated traderouting_1.TradeRoutingResult trade_routing_result = 6;
+
+    // Message from server.
+    repeated common_1.UserMessage user_message = 7;
+
+    // Ping request.
+    optional Ping ping = 10;
+
+    // Pong message in response to client Ping request.
+    optional Pong pong = 11;
+
+    // Result of cancel_deferred_request
+    optional CancelDeferredRequestResult cancel_deferred_request_result = 12;
+
+    // Reserved for internal use.
+    extensions 100 to 199;
+}
+
+// Result of information request.
+// Information is filtered according to permissions of logged-in user (or 'on-behalf-of' user).
+message InformationResult
+{
+    // ID of a corresponding request.
+    required uint32 request_id = 1;
+
+    // Operation status.
+    // This field is associated with common_1.OperationStatus enum.
+    required uint32 operation_status = 2;
+
+    // Failure details.
+    optional shared_1.Text error_message = 3;
+
+    // User information.
+    optional common_1.User user = 4;
+
+    // List of user entitlement services.
+    repeated common_1.UserEntitlementService user_entitlement_service = 5;
+
+    // Entitlement categories list.
+    repeated common_1.EntitlementCategory entitlement_category = 6;
+
+    // Entitlement service list.
+    repeated common_1.EntitlementService entitlement_service = 7;
+
+    // Profile.
+    optional common_1.Profile profile = 8;
+
+    // Get unique username result
+    optional UniqueUsernameResult unique_username_result = 9;
+
+    // Customer to sales series authorization list result message.
+    optional common_1.CustomerSalesSeriesAuthorizationListResult customer_sales_series_authorization_list_result = 10;
+
+    // Result of LoginSettingsRequest.
+    optional common_1.LoginSettingsResult login_settings_result = 11;
+
+    // Result of LoginExchangeMemberIdListRequest
+    optional common_1.LoginExchangeMemberIdListResult login_exchange_member_id_list_result = 12;
+
+    // Result of lookup_property_list_request.
+    optional common_1.LookupPropertyListResult lookup_property_list_result = 13;
+
+    // Result of AuthPartnerListRequest.
+    optional AuthPartnerListResult auth_partner_list_result = 14;
+
+    // Result of LoginBillingCustomDataRequest.
+    optional common_1.LoginBillingCustomDataResult login_billing_custom_data_result = 15;
+
+    // Request tracking number generated by CMS API
+    // Used by client to cancel deferred request
+    optional uint64 tracking_number = 16;
+}
+
+// Search operation result.
+message SearchResult
+{
+    // ID of a corresponding request.
+    required uint32 request_id = 1;
+
+    // Operation status.
+    // This field is associated with common_1.OperationStatus enum.
+    required uint32 operation_status = 2;
+
+    // This flag is set to True if all search results are sent
+    // and nothing was filtered out by 'top' parameter.
+    optional bool is_complete = 3 [default = true];
+
+    // Failure details.
+    optional shared_1.Text error_message = 4;
+
+    // User search result records.
+    repeated common_1.UserSearchResultRecord user_record = 5;
+
+    // Profile search result records.
+    repeated ProfileSearchResultRecord profile_record = 6;
+
+    // [obsolete] Use ProfileSearchResultRecord instead.
+    repeated common_1.SalesSeriesSearchResultRecord obsolete_sales_series_record = 7 [deprecated=true];
+
+    // Request tracking number generated by CMS API
+    // Used by client to cancel deferred request
+    optional uint64 tracking_number = 8;
+}
+
+// Result of operation request.
+message OperationResult
+{
+    // ID of a corresponding request.
+    required uint32 request_id = 1;
+
+    // Operation status.
+    // This field is associated with common_1.OperationStatus enum.
+    required uint32 operation_status = 2;
+
+    // Failure details.
+    optional shared_1.Text error_message = 3;
+
+    // Clone user result.
+    optional common_1.CloneUserResult clone_user_result = 4;
+
+    // Create profile result.
+    optional CreateProfileResult create_profile_result = 5;
+
+    // Update profile result.
+    optional UpdateProfileResult update_profile_result = 6;
+
+    // Remove profile result.
+    optional RemoveProfileResult remove_profile_result = 7;
+
+    // Create user result.
+    optional common_1.CreateUserResult create_user_result = 8;
+
+    // Update user result.
+    optional common_1.UpdateUserResult update_user_result = 9;
+
+    // Remove user result.
+    optional common_1.RemoveUserResult remove_user_result = 10;
+
+    // [re-]link login to profile result.
+    optional LinkLoginToProfileResult link_login_to_profile_result = 11;
+
+    // Modify user entitlement service result.
+    optional common_1.ModifyUserEntitlementServiceResult modify_user_entitlement_service_result = 12;
+
+    // Send welcome e-mail result.
+    optional SendWelcomeEmailResult send_welcome_email_result = 13;
+
+    // Restore user result.
+    optional common_1.RestoreUserResult restore_user_result = 14;
+
+    // Restore profile result.
+    optional RestoreProfileResult restore_profile_result = 15;
+
+    // Result of customer to sales series authorization list update.
+    optional common_1.UpdateCustomerSalesSeriesAuthorizationListResult update_customer_sales_series_authorization_list_result = 16;
+
+    // Result of UpdateLoginExchangeMemberIdList.
+    optional common_1.UpdateLoginExchangeMemberIdListResult update_login_exchange_member_id_list_result = 17;
+
+    // Result of UpdateLoginSettings.
+    optional common_1.UpdateLoginSettingsResult update_login_settings_result = 18;
+
+    // Result of ActivateLogin
+    optional common_1.ActivateLoginResult activate_login_result = 19;
+
+    // Result of DeactivateLogin
+    optional common_1.DeactivateLoginResult deactivate_login_result = 20;
+
+    // Result of send credential reset email.
+    optional SendCredentialResetEmailResult send_credential_reset_email_result = 21;
+
+    // Result of generate a service security token for a special AuthServer operation.
+    optional GenerateServiceSecurityTokenResult generate_service_security_token_result = 22;
+
+    // Result of EraseCurrentCredentials.
+    optional common_1.EraseCurrentCredentialsResult erase_current_credentials_result = 23;
+
+    optional TerminateLoginSessionResult terminate_login_session_result = 24;
+
+    // Result of UpdateLoginBillingCustomData.
+    optional common_1.UpdateLoginBillingCustomDataResult update_login_billing_custom_data_result = 25;
+
+    // Request tracking number generated by CMS API
+    // Used by client to cancel deferred request
+    optional uint64 tracking_number = 26;
+}
+
+// Send welcome e-mail operation.
+message SendWelcomeEmail
+{
+    // [obsolete] Use profile_id instead.
+    optional string obsolete_customer_id = 1 [deprecated=true];
+
+    // Optional list of logins to be included into this e-mail.
+    // All profile's system logins are included if omitted.
+    repeated string login_id = 2;
+
+    // Profile id of a recipient.
+    // Supported profiles
+    optional string profile_id = 3;
+}
+
+// Result of send welcome e-mail operation.
+message SendWelcomeEmailResult
+{
+}
+
+// Send credential reset e-mail to a profile.
+message SendCredentialResetEmail
+{
+    // [obsolete] Use profile_id instead.
+    optional string obsolete_customer_id = 1 [deprecated=true];
+
+    // [required] A login linked to a profile for which the reset is requested.
+    // Only trade-routing logins are supported now.
+    optional string login_id = 2;
+
+    // List of special operations that are requested for this login.
+    // This filed is associated with common_1.AuthServerSpecialOperation enum.
+    repeated uint32 operation = 3;
+
+    // Profile id of a recipient.
+    optional string profile_id = 4;
+}
+
+// Result of send e-mail operation.
+message SendCredentialResetEmailResult
+{
+}
+
+message GenerateServiceSecurityToken
+{
+    // [required] Generate SST for this login.
+    // Only trade-routing logins are supported now.
+    optional string login_id = 1;
+
+    // List of special operations that are requested for this login.
+    // This filed is associated with common_1.AuthServerSpecialOperation enum.
+    repeated uint32 operation = 2;
+}
+
+message GenerateServiceSecurityTokenResult
+{
+    // Generated token.
+    optional string security_token = 1;
+
+    // URL that can be visited by a client to execute special operations using
+    // generated token.
+    optional string url = 2;
+}
+
+// Ping request which can be initiated by any side to ensure connection is alive.
+// Both client and server sides must respond such request with Pong.
+message Ping
+{
+   // Token routed back in Pong response.
+   optional string token = 1;
+
+   // UTC time when this request was composed. Used for network latency diagnostics.
+   required sint64 ping_utc_time = 2;
+}
+
+// Pong response which must be sent in response on Ping request.
+message Pong
+{
+   // Token passed in Ping request.
+   optional string token = 1;
+
+   // Corresponding value from Ping request.
+   required sint64 ping_utc_time = 2;
+
+   // UTC time when this response was composed.
+   required sint64 pong_utc_time = 3;
+}
+
+// Request for list of authentication partners.
+message AuthPartnerListRequest
+{
+}
+
+// Reply to AuthPartnerListRequest.
+message AuthPartnerListResult
+{
+    repeated AuthPartner auth_partner = 1;
+}
+
+// Information about authentication partner.
+message AuthPartner
+{
+    // [required] Partner's ID.
+    optional string id = 1;
+
+    // Partner's display name.
+    optional string display_name = 2;
+
+    // List of brokerage (FCM) IDs the partner enabled for.
+    repeated string brokerage_id = 3;
+}
+
+// Create profile operation.
+message CreateProfile
+{
+    // [required] Profile to create.
+    optional common_1.Profile profile = 1;
+}
+
+// Update profile operation.
+message UpdateProfile
+{
+    // [required] Profile to update.
+    optional common_1.Profile profile = 1;
+
+    // [obsolete] Use only profile field with changed fields only instead.
+    optional common_1.Profile obsolete_original_profile = 2 [deprecated=true];
+}
+
+// Remove profile operation.
+message RemoveProfile
+{
+    // [obsolete] Use profile_id instead.
+    optional string obsolete_customer_id = 1 [deprecated=true];
+
+    // Profile identifier to remove.
+    optional string profile_id = 2;
+}
+
+// Restore profile operation.
+message RestoreProfile
+{
+    // [obsolete] Use profile_id instead.
+    optional string obsolete_customer_id = 1 [deprecated=true];
+
+    // Profile identifier to remove.
+    optional string profile_id = 2;
+}
+
+// Result of create profile operation.
+message CreateProfileResult
+{
+    // [obsolete] Use profile_id instead.
+    optional string obsolete_customer_id = 1 [deprecated=true];
+
+    // Assigned profile id, if succeded.
+    optional string profile_id = 2;
+}
+
+// Result of update profile operation.
+message UpdateProfileResult
+{
+}
+
+// Result of remove profile operation.
+message RemoveProfileResult
+{
+}
+
+// Result of restore profile operation.
+message RestoreProfileResult
+{
+}
+
+// Request of profile information.
+message ProfileRequest
+{
+    // [obsolete] Use profile_id instead.
+    optional string obsolete_customer_id = 1 [deprecated=true];
+
+    // ID of a requested profile.
+    optional string profile_id = 2;
+}
+
+// Link user to a profile operation.
+message LinkLoginToProfile
+{
+    // [required] Login id to link.
+    optional string login_id = 1;
+
+    // [obsolete] Use profile_id instead.
+    optional string obsolete_customer_id = 2 [deprecated=true];
+
+    // Profile id.
+    // Supported profile types: admin, customer.
+    optional string profile_id = 3;
+}
+
+// Result of [re-]link login to a profile operation.
+message LinkLoginToProfileResult
+{
+}
+
+// Request of unique username.
+message GetUniqueUsernameRequest
+{
+    // [obsolete] Use profile_id instead.
+    optional string obsolete_customer_id = 1 [deprecated=true];
+
+    // Profile id username created for
+    optional string profile_id = 2;
+}
+
+// Result of unique username request.
+message UniqueUsernameResult
+{
+    // username, if succeeded.
+    optional string username = 1;
+}
+
+// Request to search profiles.
+message ProfileSearchRequest
+{
+    // List of possible search refine criteria.
+    enum SearchCriteria
+    {
+        // Search by customer id.
+        CUSTOMER_ID = 1;
+
+        // Search by profile name.
+        NAME = 2;
+
+        // Search by first name.
+        FIRST_NAME = 3;
+
+        // Search by last name.
+        LAST_NAME = 4;
+
+        // Search by brokerage id.
+        LINKED_BROKERAGE_ID = 5;
+
+        // Profile sales series number.
+        NUMBER = 6;
+
+        PROFILE_ID = 7;
+
+        // This field is associated with common_1.ProfileType enum type.
+        // LIMITED USE: Only explicitly, one per search option with EXACT_EQUALITY or IN rule and in all match mode.
+        PROFILE_TYPE = 8;
+    }
+
+    // [obsolete] Use search_options field instead.
+    optional string obsolete_text = 1 [deprecated=true];
+
+    // [obsolete] Use search_options field instead.
+    repeated uint32 obsolete_search_criteria = 2 [deprecated=true];
+
+    // List of search options. Each option has its own search text, criteria and matching rule.
+    repeated common_1.SearchOption search_options = 3;
+
+    // Indicates, whether all criteria must match at once.
+    // By default any criteria must match.
+    optional bool all_match_mode = 4 [default = false];
+}
+
+message ProfileSearchResultRecord
+{
+    // Associated Customer identifier.
+    optional string customer_id = 1;
+
+    // Profile name.
+    optional string name = 2;
+
+    // Profile's brokerage name.
+    optional string linked_brokerage_name = 3;
+
+    // Contact first name.
+    optional string first_name = 4;
+
+    // Contact last name.
+    optional string last_name = 5;
+
+    // Profile's linked brokerage id.
+    optional string linked_brokerage_id = 6;
+
+    // [required] Removed flag.
+    optional bool removed = 7;
+
+    // [obsolete] Authentication system of login must be used instead.
+    // Profile's authentication system.
+    // LookupPropertyListRequest { property_type = CommonLookupPropertyType.AUTHENTICATION_SYSTEM }
+    optional string obsolete_authentication_system = 8 [deprecated = true];
+
+    // [required] Profile's main type.
+    // This field is associated with Customer.ProfileType enum type.
+    optional uint32 profile_type = 9;
+
+    // Sales series profile number.
+    optional string number = 10;
+
+    // Associated Sales Series identifier.
+    optional string sales_series_id = 11;
+
+    // [required] Profile identifier.
+    optional string profile_id = 12;
+}
+
+// Result of CancelDeferredRequest
+message CancelDeferredRequestResult
+{
+    // ID of a corresponding request
+    optional uint32 request_id = 1;
+
+    // Operation status.
+    // this field is associated with common_1.OperationStatus enum
+    optional uint32 operation_status = 2;
+
+    // Failure details
+    optional shared_1.Text error_message = 3;
+}
+
+// Terminates all open sessions of login.
+// When there are no sessions does nothing.
+message TerminateLoginSession
+{
+    // [required] Login identifier.
+    // Supported login domains: trade-routing, admin
+    optional string login_id = 1;
+
+    // [optional] Specific login session identifiers to terminate.
+    // If not provided, all active sessions of the login will be terminated.
+    repeated string session_ids = 2;
+}
+
+message TerminateLoginSessionResult
+{
+}

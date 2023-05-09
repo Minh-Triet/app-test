@@ -1,0 +1,1639 @@
+// CQG common messages in API Protocols
+//
+// Last changes were made on 07 Oct 2021
+// Version 1.50
+
+syntax = "proto2";
+
+import "common/shared_1.proto";
+
+package common_1;
+
+////------------------------------------------
+//// Messages
+
+// Message from server.
+message UserMessage
+{
+    // Type of the message.
+    enum MessageType
+    {
+        // Critical error message.
+        CRITICAL_ERROR = 1;
+
+        // Warning.
+        WARNING = 2;
+
+        // General information.
+        INFO = 3;
+
+        // This message shouldn't be visible for users, only dumped into a log file.
+        LOG = 4;
+    }
+    // This field is associated with MessageType enum type.
+    required uint32 message_type = 1;
+
+    // Information about source of the message.
+    optional string source = 2;
+
+    // Message subject.
+    optional string subject = 3;
+
+    // Message text.
+    required shared_1.Text text = 4;
+
+    // Optional time when this message is expired, it should be hidden from user after this time (UTC).
+    optional sint64 expiration_utc_time = 5;
+}
+
+
+// Logon to the system and open a new session.
+message Logon
+{
+    // Session settings for additional functionality.
+    enum SessionSetting
+    {
+        // Allows restoring session in case of an accidental disconnect (see RestoreOrJoinSession message).
+        // If the setting is not specified then termination of the last connection also terminates the session without ability to restore it.
+        // For security reasons clients should not specify this setting without using the restore session functionality.
+        ALLOW_SESSION_RESTORE = 1;
+
+        // Allows other new connections to join the session (see RestoreOrJoinSession message) and work concurrently.
+        // If the setting is not specified then the session can have only one connection at each moment and a new connection pushes the old one out (if the session restore is allowed).
+        // For security reasons clients should not specify this setting without using join session functionality.
+        ALLOW_SESSION_JOIN = 2;
+    }
+
+    // [required] Current protocol version that is used by a client. Client has to fill it with values from ProtocolVersion enum.
+    optional uint32 protocol_version_minor = 1;
+    optional uint32 protocol_version_major = 2;
+
+    // Username.
+    // Ignored when access_token is provided.
+    optional string user_name = 3;
+
+    // User password.
+    // Ignored when access_token is provided.
+    optional string password = 4;
+
+    // Identifier of a client application as assigned by CQG.
+    // Ignored when access_token is provided.
+    optional string client_app_id = 5;
+
+    // Version of a client application.
+    optional string client_version = 6;
+
+    // List of settings for a new session.
+    // This field is associated with SessionSetting enum type.
+    repeated uint32 session_settings = 7;
+
+    // Optional field that indicates if possible concurrent sessions for this user should be forcedly dropped.
+    // If it is set to false then Logon may fail with corresponding error message.
+    // If it is omitted or set to true then concurrent sessions for this user will be dropped.
+    optional bool drop_concurrent_session = 8;
+
+    // Private label name.
+    // Ignored when access_token is provided.
+    optional string private_label = 9;
+
+    // Access token from CQG auth server.
+    optional string access_token = 10;
+
+    // Indicates that CMS API must notify client with additional requests statuses:
+    // ACCEPTED, QUEUED, IN_PROCESSING, CANCELED
+    optional bool subscribe_on_request_status_change = 11 [default = false];
+}
+
+// Client request to restore session because of accidental disconnect or join the same session.
+// In non-trusted mode, this operation is possible only from the same IP address.
+// Permissions to use this functionality is regulated by ALLOW_SESSION_RESTORE/ALLOW_SESSION_JOIN session settings
+// which are specified in Logon message.
+message RestoreOrJoinSession
+{
+    // Token of the session to restore or join, it has limited lifetime after disconnect.
+    required string session_token = 1;
+
+    // Identifier of the client application as assigned by CQG.
+    required string client_app_id = 2;
+
+    // Can be used by trusted clients (components connected in trust mode) to specify real client IP they act on behalf of.
+    optional string client_ip_address = 3;
+
+    // Indicates that CMS API must notify client with additional requests statuses:
+    // ACCEPTED, QUEUED, IN_PROCESSING, CANCELED
+    optional bool subscribe_on_request_status_change = 4 [default = false];
+}
+
+// Logoff session.
+message Logoff
+{
+}
+
+message Credentials
+{
+    // User name to login.
+    required string user_name = 1;
+
+    // User password.
+    optional string password = 2;
+}
+
+// Result of the Logon operation.
+message LogonResult
+{
+    // Current protocol version of the server. For information only.
+    required uint32 protocol_version_minor = 1;
+    required uint32 protocol_version_major = 2;
+
+    // Operation status.
+    // This field is associated with OperationStatus enum.
+    required uint32 operation_status = 3;
+
+    // Message in case of logon failure.
+    optional shared_1.Text error_message = 4;
+
+    // Token of a new session if logon succeeded.
+    optional string session_token = 5;
+}
+
+// Result of session restore or join attempt.
+message RestoreOrJoinSessionResult
+{
+    // This field is associated with OperationStatus enum.
+    required uint32 operation_status = 1;
+
+    // Message in case of failure.
+    optional shared_1.Text error_message = 2;
+}
+
+// Server notification about closing user's session,
+// server closes connection after this message.
+message LoggedOff
+{
+    // Logoff reason.
+    optional shared_1.Text reason = 2;
+}
+
+// Request of user's entitlements.
+message UserEntitlementServiceRequest
+{
+    // User ID to request user's entitlements.
+    required string user_id = 1;
+}
+
+// Request of entitlement categories.
+message EntitlementCategoryListRequest
+{
+}
+
+// Request of entitlement service information.
+message EntitlementServiceRequest
+{
+    // Id of the requested service.
+    required uint32 entitlement_service_id = 1;
+}
+
+// Request of entitlement service list
+// available for the current session login.
+message EntitlementServiceListRequest
+{
+   // Optional list of brokerage IDs. If it is not specified all brokerages for current session will be used.
+   repeated string brokerage_id = 1;
+}
+
+// Entitlement Service details.
+message EntitlementService
+{
+    // Service authorization type.
+    enum AuthorizationType
+    {
+        DISABLE_ONLY = 1;
+        VIEW_ONLY = 2;
+        ENABLE_ONLY = 3;
+        FULL_CONTROL = 4;
+    }
+
+    // Special service options.
+    enum ServiceOption
+    {
+        ONLY_FOR_TRADERS = 1;
+        FREE_FOR_TRADERS = 2;
+    }
+
+    // Identifier.
+    required uint32 id = 1;
+
+    // Name.
+    required shared_1.Text name = 2;
+
+    // List of assigned entitlement category IDs.
+    repeated uint32 category_id = 3;
+
+    // Service prices.
+    repeated Price price = 4;
+
+    // Description.
+    required shared_1.Text description = 5;
+
+    // Authorization Type.
+    // This field is associated with EntitlementService.AuthorizationType enum type.
+    required uint32 authorization_type = 6;
+
+    // List of this service constraints.
+    repeated EntitlementConstraint constraint = 7;
+
+    // Indicates if a separate agreement is required according to
+    // original service provider rules (False if omitted).
+    optional bool agreement_required = 8;
+
+    // Optional agreement text.
+    optional shared_1.Text agreement = 9;
+
+    // Optional link of a service to a subscriber type.
+    // The service is allowed for any subscriber type if omitted.
+    // This field is associated with User.SubscriberType enum type.
+    optional uint32 subscriber_type = 10;
+
+    // Indicates whether billing brokerage is mandatory in order to enable the service for a login.
+    optional bool billing_brokerage_required = 11;
+
+    // Login domains.
+    // This field is associated with LoginDomain enum type.
+    repeated uint32 login_domains = 12;
+
+    // Special options.
+    // This field is associated with EntitlementService.ServiceOption enum type.
+    repeated uint32 options = 13;
+
+    // Included items.
+    repeated EntitlementServiceItem items = 14;
+
+    // Indicates whether brokerage can be assigned for the services in for a login.
+    optional bool brokerage_assignable = 15;
+
+    // Indicates whether service requires explicit brokerage authorization in order to be available for brokerage logins.
+    optional bool brokerage_authorization_required = 16;
+}
+
+// Entitlement item description.
+message EntitlementServiceItem
+{
+    // [required] Entitlement Item ID.
+    optional string id = 1;
+
+    // [required] Entitlement Item Type ID.
+    optional EntitlementServiceItemType type = 2;
+
+    // [required] Item name.
+    optional shared_1.Text name = 3;
+}
+
+// Entitlement item type.
+message EntitlementServiceItemType
+{
+    // [required] Type ID in INFO DB (INFO Value).
+    optional string id = 1;
+
+    // [required] Type name.
+    optional shared_1.Text name = 2;
+
+    // Type description.
+    optional shared_1.Text description = 3;
+
+    // Determines whether item type is exchange (market data).
+    optional bool is_market_data = 4;
+}
+
+// Price as currency and value.
+message Price
+{
+    // Currency code (real currency code is ISO 4217 based.
+    required string currency = 1;
+
+    // Price value in a specified currency.
+    required double value = 2;
+}
+
+// Category of entitlement.
+message EntitlementCategory
+{
+    // Category ID.
+    required uint32 id = 1;
+
+    // Category name.
+    required shared_1.Text name = 2;
+
+    // List of sub-categories.
+    repeated EntitlementCategory sub_category = 3;
+
+    // Indicates whether brokerage can be assigned for the services in the catogory for a login.
+    optional bool brokerage_assignable = 4;
+}
+
+// Entitlement constraint
+message EntitlementConstraint
+{
+    // Constraint type.
+    enum Type
+    {
+        // The services in the constraint are mutually exclusive.
+        EXCLUDE = 1;
+
+        // Warning constraints are used where two services would normally not be allowed together
+        // because one is a subset of the other, but we can't use the exclude constraint because
+        // we need to allow the user to try out a version of the more extensive service.
+        WARNING = 2;
+
+        // One of the services is mandatory within constraint group but only one service
+        // from the group can be selected at the same time (if enforced for this user).
+        MANDATORY_ONLY_ONE = 3;
+
+        // Only one service from the group can be selected at the same time.
+        PICK_ONE = 4;
+
+        // Only service in whitelist works with particular product service.
+        PRODUCT_WHITELIST = 5;
+
+        // Constraint to show that all service entitlement items are implicitly included in ref-service
+        INCLUDE_ITEMS = 6;
+    }
+    // This field is associated with EntitlementConstraint.Type enum type.
+    required uint32 constraint_type = 1;
+
+    // Referenced service id.
+    optional uint32 ref_service_id = 2;
+
+    // Constraint group name for some constraint types.
+    optional string constraint_group = 3;
+}
+
+// Request of user information.
+message UserInfoRequest
+{
+    // User ID to request user information.
+    required string user_id = 4;
+}
+
+// User information.
+message User
+{
+    // Subscriber Type.
+    enum SubscriberType
+    {
+        // Professional subscriber.
+        PRO = 0;
+
+        // Non-professional subscriber.
+        NON_PRO = 1;
+    }
+
+    // Defines classes of login.
+    enum LoginClass
+    {
+        // Regular login for trading.
+        REGULAR = 1;
+
+        // Fix direct access login.
+        FIX_DIRECT = 2;
+
+        // Order handler login.
+        ORDER_HANDLER = 3;
+
+        // Template login for cloning only.
+        TEMPLATE = 4;
+    }
+
+    // [optional] List of field ids to clear during update operation.
+    repeated uint32 cleared_fields = 23;
+
+    // [required] User Identifier.
+    // The value is ignored for CreateUser operation.
+    optional string id = 1;
+
+    // [required-create] User name (max length = 32).
+    optional string user_name = 2;
+
+    // [obsolete] User first name (max length = 20).
+    optional string obsolete_first_name = 3 [deprecated=true];
+
+    // [obsolete] User last name (max length = 25).
+    optional string obsolete_last_name = 4 [deprecated=true];
+
+    // [obsolete] User e-mail (max length = 60).
+    optional string obsolete_email = 5 [deprecated=true];
+
+    // [immutable-update][required-create] Linked customer id (required for new users creation).
+    // Mutually exclusive with profile_id.
+    // Use profile_id instead.
+    optional string customer_id = 6;
+
+    // [required-create] Subscriber Type. PRO by default when created.
+    // This field is associated with User.SubscriberType enum type.
+    // Supported login domains: system, trade-routing.
+    optional uint32 subscriber_type = 7;
+
+    // Date till the user is alive and then the user will be removed.
+    // Datetime format is used but only date part is used, time part is ignored.
+    // Supported login domains: system.
+    optional sint64 removal_date = 8;
+
+    // [immutable] Identifier of CQG System user.
+    optional string system_id = 9;
+
+    // [immutable] Identifier of Trade Routing user.
+    optional string trader_id = 10;
+
+    // [immutable] List of enforced mandatory constraint group names.
+    repeated string enforced_constraint_group = 11;
+
+    // [immutable] Billing currency code (ISO 4217)
+    optional string currency = 12;
+
+    // [immutable-update][required-create] Login domain.
+    // This field is associated with LoginDomain enum type.
+    optional uint32 domain = 13;
+
+    // [immutable] Removed flag.
+    optional bool removed = 14;
+
+    // [immutable-update] Login class.
+    // If not provided during create, default used - regular class.
+    // This field is associated with User.LoginClass enum type.
+    // Supported login domains: trade-routing.
+    optional uint32 class = 15;
+
+    // [immutable] Indicates whether login is used for demo access.
+    // It cannot be used during login creation and cannot be changed for existing login.
+    // Supported login domains: trade-routing.
+    optional bool is_temporary = 16;
+
+    // [immutable] Determines, whether login can be used for trading.
+    // Supported login domains: trade-routing.
+    optional bool is_active = 17;
+
+    // [immutable] Date and Time, when login is deactivated and can't be used for trading.
+    // Supported login domains: trade-routing.
+    optional sint64 expiration_time = 18;
+
+    // [immutable] Identifier of CAST user.
+    optional string cast_user_id = 19;
+
+    // Admin login's scope.
+    // Supported login domains: admin.
+    // This field is associated with AdminLoginScope enum.
+    optional uint32 scope = 20;
+
+    // Enforce IP whitelist check.
+    // Supported login domains: admin, trade-routing.
+    optional bool enforce_ip_whitelist = 21;
+
+    // IP addresses whitelist in CIDR notation.
+    // Supported login domains: admin, trade-routing.
+    repeated string ip_whitelist = 22;
+
+    // 23 is used for cleared_fields.
+
+    // [immutable-update][required-create] Owner profile id.
+    // Mutually exclusive with customer_id.
+    // Supported profile types: admin, customer.
+    optional string profile_id = 24;
+}
+
+// Additional login settings.
+message LoginSettings
+{
+    // [optional] List of field ids to clear during update operation.
+    repeated uint32 cleared_fields = 7;
+
+    // [required] Login Identifier.
+    optional string login_id = 1;
+
+    // Preferred connection point.
+    // The values are associated with a lookup property with CONNECTION_POINT type.
+    optional string preferred_connection_point_id = 2;
+
+    // Possible concurrent sessions number per one IP.
+    // View and modify access to this field is limited for Admin users.
+    // Provide the field id in cleared_fields to reset the value during update operation.
+    optional uint32 concurrent_sessions_number = 3;
+
+    // Determines whether password never expires.
+    optional bool password_never_expires = 4;
+
+    // [obsolete] Strategies can be executed through this login.
+    optional bool obsolete_is_strategy_runner = 5 [deprecated=true];
+
+    // [immutable] This can be used in case when preferred_connection_point_id is missing in lookup list.
+    optional string preferred_connection_point_name = 6;
+
+    // Linked login for operations on behave of.
+    // Admin domain only.
+    optional string linked_login_id = 8;
+
+    // Parameters of external authentication, if any.
+    // Supported login domains: trade-routing.
+    optional ExternalAuth external_auth = 9;
+
+    // Per-user override of limit of allowed logons per day. Zero or absent field
+    // mean no override.
+    optional uint32 daily_logon_limit = 10;
+
+    // [immutable] Number of performed logons for current day. Absent field means zero.
+    // Note: This property is intentionally mutable, allowing reset of the logon counter by FCMs/ops.
+    // Note: day boundary is 00:00 UTC.
+    optional uint32 daily_logon_count = 11;
+
+    // Authentication system identifier.
+    // LookupPropertyListRequest { property_type = CommonLookupPropertyType.AUTHENTICATION_SYSTEM }
+    // Supported login domains: trade-routing, admin.
+    optional string authentication_system = 12;
+
+    // [immutable] Determines whether login is allowed to exceed account authorizations limit.
+    optional bool allow_exceed_account_limit = 13;
+}
+
+// Service assigned to a user.
+message UserEntitlementService
+{
+    // ID of a user.
+    required string user_id = 1;
+
+    // Assigned service ID.
+    required uint32 entitlement_service_id = 2;
+
+    // [immutable] Time when this entitlement was enabled or is planned to enabled for the user.
+    optional sint64 from_utc_time = 3;
+
+    // [obsolete] Time when this entitlement is planned to be disabled for the user.
+    optional sint64 obsolete_to_utc_time = 4 [deprecated=true];
+
+    // ID of brokerage who is responsible for billing of the service.
+    optional string billing_brokerage_id = 5;
+
+    // Brokerages assigned to Entitlement service (only for products).
+    repeated AssignedBrokerage assigned_brokerages = 6;
+}
+
+// Brokerage assigned to Entitlement service.
+message AssignedBrokerage
+{
+    // Brokerage ID.
+    required string brokerage_id = 1;
+
+    // If True - brokerage is charged for service not by price, but by usage; otherwise - by price, as usual.
+    optional bool waive_base_charge = 2;
+}
+
+// Request to search for a user.
+message UserSearchRequest
+{
+    // List of possible search refine criteria.
+    enum SearchCriteria
+    {
+        // Search by user_id.
+        // With 'CONTAINS' rule, minimal query text length is limited with 3 symbols.
+        USER_ID = 1;
+
+        // Search by user name.
+        // With 'CONTAINS' rule, minimal query text length is limited with 3 symbols.
+        USER_NAME = 4;
+
+        // Search by profile sales series number.
+        PROFILE_SALES_SERIES_NUMBER = 5;
+
+        // Search by profile sales series name.
+        PROFILE_SALES_SERIES_NAME = 6;
+
+        // Search by sales series ID.
+        // Use PROFILE_SALES_SERIES_ID instead.
+        SALES_SERIES_ID = 7;
+
+        // Search by customer ID for all linked users.
+        // With 'CONTAINS' rule, minimal query text length is limited with 3 symbols.
+        // In case of system logins, only EXACT_EQUALITY rule is used, regardless provided rule in request.
+        // Use PROFILE_ID instead.
+        CUSTOMER_ID = 8;
+
+        // Search by authorized brokerage id.
+        BROKERAGE_ID = 9;
+
+        // Search by authorized brokerage name.
+        BROKERAGE_NAME = 10;
+
+        // Login class.
+        // Applicable only for trade routing domain.
+        // This field is associated with User.LoginClass enum type.
+        // LIMITED USE: Only explicitly, one per search option with EXACT_EQUALITY rule and in all match mode.
+        CLASS = 11;
+
+        // Login domain.
+        // This field is associated with LoginDomain enum type.
+        // LIMITED USE: Only explicitly, one per search option with EXACT_EQUALITY rule and in all match mode.
+        LOGIN_DOMAIN = 12;
+
+        // Search by profile (customer/admin) ID for all linked users.
+        // With 'CONTAINS' rule, minimal query text length is limited with 3 symbols.
+        // In case of system logins, only EXACT_EQUALITY rule is used, regardless provided rule in request.
+        PROFILE_ID = 13;
+
+        // Search by profile sales series ID.
+        PROFILE_SALES_SERIES_ID = 14;
+    }
+
+    // [obsolete] Text to search.
+    optional string obsolete_text = 1 [deprecated=true];
+
+    // [obsolete] List of search options.
+    // This field is associated with SearchCriteria enum type.
+    // Empty list means search by any possible options.
+    repeated uint32 obsolete_search_criteria = 2 [deprecated = true];
+
+    // List of search options. Each option has its own search text, criteria and matching rule.
+    repeated SearchOption search_options = 3;
+
+    // Indicates, whether all criteria must match at once.
+    // By default any criteria must match.
+    optional bool all_match_mode = 4 [default = false];
+}
+
+// User search result record.
+message UserSearchResultRecord
+{
+    // User identifier.
+    required string user_id = 1;
+
+    // User name.
+    required string user_name = 2;
+
+    // Customer's first name.
+    optional string first_name = 3;
+
+    // Customer's last name.
+    optional string last_name = 4;
+
+    // Customer id.
+    // Use profile_id instead.
+    optional string customer_id = 5;
+
+    // Customer name.
+    optional string customer_name = 6;
+
+    // Customer's brokerage name.
+    optional string customer_brokerage_name = 7;
+
+    // Removed flag.
+    optional bool removed = 8;
+
+    // User class.
+    // This field is associated with User.LoginClass enum type.
+    optional uint32 class = 9;
+
+    // Temporary user for demo access.
+    optional bool is_temporary = 10;
+
+    // Owner profile id.
+    optional string profile_id = 11;
+}
+
+// Clone template or regular user request.
+message CloneUser
+{
+    // [required] Source user identifier.
+    optional string source_user_id = 1;
+
+    // [required] New user username (max length = 32).
+    optional string new_user_username = 2;
+
+    // [obsolete] New user first name (max length = 20).
+    optional string obsolete_new_user_first_name = 3 [deprecated=true];
+
+    // [obsolete] New user last name (max length = 25).
+    optional string obsolete_new_user_last_name = 4 [deprecated=true];
+
+    // [obsolete] New user address.
+    optional Address obsolete_new_user_address = 5 [deprecated=true];
+
+    // [required] New user contact information.
+    optional ContactInformation new_user_contact_information = 6;
+
+    // [obsolete] New user middle initial (max length = 1).
+    optional string obsolete_new_user_middle_initial = 7 [deprecated=true];
+
+    // Profile identifier that cloned login should be linked with.
+    optional string target_profile_id = 8;
+
+    // This flag if set to true prohibit to send welcome email for cloned trader.
+    optional bool no_welcome_email = 9;
+}
+
+
+// Clone user operation result.
+message CloneUserResult
+{
+    // New user identifier.
+    required string new_user_id = 1;
+
+    // New linked profile identifier.
+    optional string new_profile_id = 2;
+}
+
+// Address information.
+message Address
+{
+    // List of possible validation statuses of an address.
+    enum AddressStatus
+    {
+        INVALID = 0;
+        VALID = 1;
+        NO_VALIDATION = 2;
+        NEW = 3;
+    }
+
+    // [optional] List of field ids to clear.
+    repeated uint32 cleared_fields = 9;
+
+    // Country code (ISO 3166 based) (max length = 2).
+    optional string country = 1;
+
+    // State code (ISO 3166 based) (max length = 2).
+    // To clear this field use cleared_fields.
+    optional string state = 2;
+
+    // City (max length = 25).
+    optional string city = 3;
+
+    // ZIP/Postal code (max length = 9).
+    optional string zip = 4;
+
+    // Address line 1 (max length = 58).
+    optional string address = 5;
+
+    // Address line 2 (max length = 58).
+    optional string address_2 = 6;
+
+    // Name of address for its identification.
+    optional string name = 7;
+
+    // [optional] Validation status of the address.
+    // This field is associated with Address.AddressStatus enum type.
+    optional uint32 address_status = 8;
+
+    // 9 is used for cleared_fields.
+}
+
+// Contact information.
+message ContactInformation
+{
+    // List of e-mail addresses.
+    // Must contain at least one e-mail.
+    // Maximum allowed size is 2 elements.
+    repeated Email email = 1;
+
+    // List of phones.
+    // Maximum allowed size is 3 elements.
+    repeated Phone phone = 2;
+
+    // List of faxes.
+    // Maximum allowed size is 1 element.
+    repeated Phone fax = 3;
+
+    // Contact first name (max length = 20).
+    optional string first_name = 4;
+
+    // Contact last name (max length = 25).
+    optional string last_name = 5;
+
+    // Mail address information.
+    // Maximum allowed size is 1 element.
+    repeated Address address = 6;
+}
+
+// e-mail address information.
+message Email
+{
+    // e-mail (max length = 60).
+    // It should be valid email address according to RFC 5322 standard or single period '.'.
+    required string email = 1;
+}
+
+// Phone information.
+message Phone
+{
+    // Phone number (max length = 20).
+    required string number = 1;
+}
+
+// Create user operation.
+message CreateUser
+{
+    // User to create.
+    required User user = 1;
+}
+
+// Update user operation.
+message UpdateUser
+{
+    // [required] User to update.
+    // Only fields for update must be provided.
+    optional User user = 1;
+
+    // [obsolete] Use only user field instead.
+    optional User obsolete_original_user = 2 [deprecated = true];
+}
+
+// Remove user operation.
+message RemoveUser
+{
+    // User identifier to remove.
+    required string id = 1;
+}
+
+// Restore user operation.
+message RestoreUser
+{
+    // User identifier to restore.
+    required string id = 1;
+}
+
+// Result of create user operation.
+message CreateUserResult
+{
+    // Assigned user id, if succeeded.
+    optional string id = 1;
+}
+
+// Result of update user operation.
+message UpdateUserResult
+{
+}
+
+// Result of restore user operation.
+message RestoreUserResult
+{
+}
+
+// Result of remove user operation.
+message RemoveUserResult
+{
+}
+
+// Service with an optional restriction period.
+message RestrictedEntitlementService
+{
+    // Service ID.
+    required uint32 entitlement_service_id = 1;
+
+    // [immutable] Time when this entitlement was enabled or is planned to enabled for the user.
+    optional sint64 from_utc_time = 2;
+
+    // [obsolete] Time when this entitlement is planned to be disabled for the user.
+    optional sint64 obsolete_to_utc_time = 3 [deprecated=true];
+
+    // ID of brokerage who will pay for the service usage.
+    optional string billing_brokerage_id = 4;
+
+    // All brokerages assigned to Entitlement service (only for products).
+    repeated AssignedBrokerage assigned_brokerages = 5;
+}
+
+// Modify user entitlement services operation.
+message ModifyUserEntitlementService
+{
+    // User id to modify the list of services.
+    required string user_id = 1;
+
+    // Services to add.
+    // Services to change restriction periods, billing brokerage or assigned brokerages.
+    repeated RestrictedEntitlementService entitlement_service_to_set = 2;
+
+    // Services to remove.
+    repeated uint32 entitlement_service_id_to_remove = 3;
+}
+
+// Result of modify user entitlement service operation.
+message ModifyUserEntitlementServiceResult
+{
+    // [obsolete] List of user entitlement services after modification.
+    repeated RestrictedEntitlementService obsolete_restricted_entitlement_service = 1 [deprecated=true];
+}
+
+// This entity is used as a common list of name - value pairs for different fields.
+message LookupProperty
+{
+    // The value is associated with Lookup Property type enum defined within the request scope.
+    required uint32 type = 1;
+
+    // Property Value.
+    // This value must be provided as corresponding field value (usually <entity>_id) in specific message.
+    required string value = 2;
+
+    // Property Name.
+    required shared_1.Text name = 3;
+
+    // Optional property description.
+    optional shared_1.Text description = 4;
+}
+
+// Get a list of lookup properties.
+message LookupPropertyListRequest
+{
+    // List of property types to request.
+    // Empty list means all types are requested.
+    // The values are associated with Lookup Property type enum defined within the request scope.
+    repeated uint32 property_type = 1;
+}
+
+// Result of a list of lookup properties request.
+message LookupPropertyListResult
+{
+    // List of requested lookup properties.
+    repeated LookupProperty lookup_property = 1;
+}
+
+// Search for sales series.
+message SalesSeriesSearchRequest
+{
+    // List of possible search refine criteria.
+    enum SearchCriteria
+    {
+        // Search by sales series ID.
+        ID = 1;
+
+        // Search by sales series number.
+        NUMBER = 2;
+
+        // Search by sales series name.
+        NAME = 3;
+
+        // Search by brokerage id.
+        BROKERAGE_ID = 4;
+
+        FIRST_NAME = 5;
+
+        LAST_NAME = 6;
+    }
+
+    // [obsolete] Text to search.
+    optional string obsolete_text = 1 [deprecated = true];
+
+    // [obsolete] List of search options.
+    // This field is associated with SearchCriteria enum type.
+    // Empty list means search by any possible options.
+    repeated uint32 obsolete_search_criteria = 2 [deprecated=true];
+
+    // List of search options. Each option has its own search text, criteria and matching rule.
+    repeated SearchOption search_options = 3;
+
+    // Indicates, whether all criteria must match at once.
+    // By default any criteria must match.
+    optional bool all_match_mode = 4 [default = false];
+}
+
+// Represents single found sales series.
+message SalesSeriesSearchResultRecord
+{
+    optional string sales_series_id = 1;
+
+    optional string sales_series_name = 2;
+
+    optional string sales_series_number = 3;
+
+    optional string brokerage_id = 4;
+
+    optional string brokerage_name = 5;
+
+    optional bool removed = 6;
+}
+
+// Common tuple message of string values.
+message Tuple
+{
+    optional string first = 1;
+    optional string second = 2;
+    optional string third = 3;
+}
+
+// Customer to sales series authorization list request message.
+// By default result contains at most DEFAULT_RESULT_RECORDS_NUMBER records.
+// Set parameter top to a larger number to receive more.
+message CustomerSalesSeriesAuthorizationListRequest
+{
+    // Customer ID.
+    // Mutually exclusive with sales_series_id, profile_id, profile_sales_series_id field.
+    // Use profile_id instead.
+    optional string customer_id = 1;
+
+    // Sales series ID.
+    // Mutually exclusive with customer_id, profile_id, profile_sales_series_id field.
+    // Use profile_sales_series_id instead.
+    optional string sales_series_id = 2;
+
+    // optionally restrict results by returning the first 'top' records.
+    optional uint32 top = 3;
+
+    // Profile ID.
+    // Supported types: customer, admin.
+    // Mutually exclusive with profile_sales_series_id, customer_id, sales_series_id field.
+    optional string profile_id = 4;
+
+    // Profile sales series ID.
+    // Mutually exclusive with profile_id, customer_id, sales_series_id field.
+    optional string profile_sales_series_id = 5;
+}
+
+// Update customer to sales series authorization list operation.
+message UpdateCustomerSalesSeriesAuthorizationList
+{
+    // Links to add.
+    // Authorization is added if it does not exist with this customer and sales series id.
+    repeated CustomerSalesSeriesLink links_to_set = 1;
+
+    // Links to remove. First - customer id (profile id), second - sales series id (profile sales series id).
+    repeated Tuple links_to_remove = 2;
+}
+
+// Customer to sales series authorization list result message.
+message CustomerSalesSeriesAuthorizationListResult
+{
+    // List of customer to sales series authorization links.
+    repeated CustomerSalesSeriesLink customer_sales_series_links = 1;
+
+    // This flag is set to true if all results are sent
+    // and nothing was filtered out by 'top' parameter.
+    optional bool is_complete = 2 [default = true];
+}
+
+// Result of customer to sales series authorization list updation.
+message UpdateCustomerSalesSeriesAuthorizationListResult
+{
+    // If message is received then authorizations were updated successfully.
+}
+
+// Customer to sales series authorization link.
+message CustomerSalesSeriesLink
+{
+    // Customer ID.
+    // Use profile_id instead.
+    optional string customer_id = 1;
+
+    // Sales series ID.
+    // Use profile_sales_series_id instead.
+    optional string sales_series_id = 2;
+
+    // [immutable] Sales series name.
+    optional string sales_series_name = 3;
+
+    // [immutable] Sales series number.
+    optional string sales_series_number = 4;
+
+    // Main profile id.
+    // Supported types: customer, admin.
+    optional string profile_id = 5;
+
+    // Sales series profile id.
+    optional string profile_sales_series_id = 6;
+}
+
+// Login additional settings request.
+message LoginSettingsRequest
+{
+    // [required] Login identifier.
+    optional string login_id = 1;
+}
+
+// Result of LoginSettingsRequest.
+message LoginSettingsResult
+{
+    // [required] Login settings.
+    optional LoginSettings login_settings = 1;
+}
+
+// Update Login settings.
+message UpdateLoginSettings
+{
+    // [required] Login settings.
+    optional LoginSettings login_settings = 1;
+}
+
+// Result of UpdateLoginSettings.
+message UpdateLoginSettingsResult
+{
+    // If message is received then operation was successfully.
+}
+
+// Requests login's member ids.
+message LoginExchangeMemberIdListRequest
+{
+    // [required] Login identifier.
+    optional string login_id = 1;
+}
+
+// Requests login's member ids.
+message LoginExchangeMemberIdListResult
+{
+    // Member ids.
+    repeated LoginExchangeMemberId login_member_ids = 1;
+}
+
+// Login member id.
+message LoginExchangeMemberId
+{
+    // [required] Login identifier.
+    optional string login_id = 1;
+
+    // [required] Exchange identifier.
+    // LookupPropertyListRequest { property_type = CommonLookupPropertyType.EXCHANGE }
+    optional string exchange_id = 2;
+
+    // [required] Exchange member identifier.
+    optional string member_id = 3;
+}
+
+// Update login exchange member id list.
+message UpdateLoginExchangeMemberIdList
+{
+    // [required] Login id to update member ids.
+    optional string login_id = 1;
+
+    // Member ids to add or change.
+    repeated LoginExchangeMemberId member_ids_to_set = 2;
+
+    // Member ids to remove from login.
+    // First - login id, second - exchange id.
+    repeated common_1.Tuple member_ids_to_remove = 3;
+}
+
+// Result of UpdateLoginExchangeMemberIdList.
+message UpdateLoginExchangeMemberIdListResult
+{
+    // If message is received then operation was successfully.
+}
+
+// Activate login operation.
+message ActivateLogin
+{
+    // [required] Login identifier to activate.
+    optional string login_id = 1;
+}
+
+// Deactivate login operation.
+message DeactivateLogin
+{
+    // [required] Login identifier to deactivate.
+    optional string login_id = 1;
+
+    // Date and time when login will be deactivated.
+    optional sint64 expiration_time = 2;
+}
+
+// Result of ActivateLogin
+message ActivateLoginResult
+{
+}
+
+// Result of DeactivateLogin
+message DeactivateLoginResult
+{
+}
+
+// Erases current credentials of specified types.
+message EraseCurrentCredentials
+{
+    // [required] Login identifier.
+    optional string login_id = 1;
+
+    // List of credentials to erase.
+    // This filed is associated with common_1.CredentialType enum.
+    repeated uint32 credential_types = 2;
+}
+
+// Result of EraseCurrentCredentials
+message EraseCurrentCredentialsResult
+{
+}
+
+// Represents search option for search requests.
+message SearchOption
+{
+    enum MatchingRule
+    {
+        CONTAINS = 0;
+        STARTS_WITH = 1;
+        ENDS_WITH = 2;
+        EXACT_EQUALITY = 3;
+
+        // Only criteria marked as supported for this rule can be used with.
+        // Format: value1,value2. Where each value matches by EXACT_EQUALITY.
+        // Searches records that match any of these values.
+        IN_MATCHING_RULE = 4;
+    }
+
+    // [required] Text to search.
+    // Empty text is prohibited.
+    optional string text = 1;
+
+    // Search criteria.
+    // For each type of search request corresponding enum values should be used.
+    // Empty means search by any possible criterion.
+    // Regardless 'all match mode' set on search request level, criteria given here match between each other with 'any' mode.
+    repeated uint32 criteria = 2;
+
+    // Comparing matching rule. Associated with MatchingRule enum.
+    // By default all matching rules are used in the following order: EXACT_EQUALITY, STARTS_WITH, ENDS_WITH, CONTAINS.
+    optional uint32 matching_rule = 3;
+}
+
+
+////------------------------------------------
+//// Enumerations
+
+// Operation result enum.
+enum OperationStatus
+{
+    // Successful result.
+    SUCCESS = 1;
+
+    // Failed result.
+    FAILURE = 2;
+
+    // Request accepted by CMS API and will be scheduled for processing
+    ACCEPTED = 3;
+
+    // Request was defered in CMS API Waiting Queue
+    QUEUED = 4;
+
+    // Request processing started by CMS API
+    IN_PROCESSING = 5;
+
+    // Request was cancelled from Waiting Queue
+    CANCELED = 6;
+}
+
+// Domain of the login information
+enum LoginDomain
+{
+    // CQG Gateway login domain.
+    CQG_TRADE_ROUTING = 2;
+
+    // CQG System (IC, QTrader, etc.) login domain.
+    CQG_SYSTEM = 3;
+
+    // CQG Admin (CMS, CAST, CAST2) login domain.
+    CQG_ADMIN = 4;
+}
+
+// Types of common lookup properties.
+enum CommonLookupPropertyType
+{
+    AUTHENTICATION_SYSTEM = 201;
+
+    CONNECTION_POINT = 202;
+
+    EXCHANGE = 203;
+}
+
+// List of allowed AuthServer special service operations.
+enum AuthServerSpecialOperation
+{
+    // Complete regular logon that was previously failed due to required operations
+    // exist for logon. This operation is enabled only for SSTs returned by AuthServer
+    // in LogonResult when logon fails with one of following codes:
+    // - PASSWORD_EXPIRED;
+    // - UNSIGNED_AGREEMENT;
+    // - OPERATIONS_REQUIRED;
+    // - SECOND_FACTOR_INIT_REQUIRED.
+    COMPLETE_LOGON = 0;
+
+    // Set static password without providing old static password.
+    SET_PASSWORD = 1;
+
+    // Setup new second factor regardless if it is set already.
+    SETUP_SECOND_FACTOR = 2;
+
+    // Change expired static password.
+    CHANGE_EXPIRED_PASSWORD = 3;
+
+    // Sign agreement(s).
+    SIGN_AGREEMENT = 4;
+
+    // Verify user's phone number.
+    VERIFY_PHONE = 5;
+}
+
+// List of credential types.
+enum CredentialType
+{
+    STATIC_PASSWORD = 1;
+    SECOND_FACTOR = 2;
+}
+
+// List of possible entities.
+enum EntityType
+{
+    ENTITY_TYPE_ACCOUNT = 1;
+    ENTITY_TYPE_ORDER = 2;
+    ENTITY_TYPE_LOGIN = 3;
+    ENTITY_TYPE_PROFILE = 4;
+}
+
+enum LogonResultCode
+{
+    //// success codes
+    // User is logged in to the system.
+    LOGON_SUCCESS = 0;
+
+    //// failure codes (100+)
+    // General failure.
+    LOGON_FAILURE = 101;
+
+    // One-time password is required for this user but it was not sent, repeat logon
+    // with one-time password.
+    NO_ONETIME_PASSWORD = 103;
+
+    // User password is expired, only change password operation is allowed.
+    PASSWORD_EXPIRED = 104;
+
+    // The negotiation rules for LogonRoutineClient have been violated, e.g. user has specified several fields at once in one message.
+    ROUTINE_ERROR = 105;
+
+    // Some fields in LogonInit have wrong values.
+    WRONG_PARAMETERS = 106;
+
+    // User has been locked out by the system.
+    USER_AUTO_LOCKOUT = 107;
+
+    // User has been locked out by admins.
+    USER_MANUAL_LOCKOUT = 108;
+
+    // Second factor authentication is required from this user, but it is not initialised, initialize and repeat logon
+    SECOND_FACTOR_INIT_REQUIRED = 109;
+
+    // Client application version isn't supported, the client application must be upgraded.
+    INCOMPATIBLE_CLIENT = 110;
+
+    // There is unsigned/rejected agreement(s) that denies logon.
+    UNSIGNED_AGREEMENT = 111;
+
+    // User exceeded allowed number of logons.
+    TOO_MANY_LOGONS = 112;
+
+    // Verification of user's phone number is required.
+    PHONE_VERIFICATION_REQUIRED = 113;
+
+    // No resources granted to the user.
+    ACCESS_DENIED = 114;
+}
+
+// Represents admin login scope.
+enum AdminLoginScope
+{
+    CQG = 1;
+    BROKERAGE = 2;
+    SALES_REP = 3;
+}
+
+// Represents common message of id and name.
+message NamedEntity
+{
+    // Identifier.
+    optional string id = 1;
+
+    // Name.
+    optional shared_1.Text name = 2;
+}
+
+// Represents template message for adding/removing links between entities.
+message UpdateEntityLinks
+{
+    // Links to add.
+    repeated Tuple links_to_set = 1;
+
+    // Links to remove.
+    repeated Tuple links_to_remove = 2;
+}
+
+// Result of update entity links operation.
+message UpdateEntityLinksResult
+{
+    // If message is received then links was updated successfully.
+}
+
+// Represents template message for requesting linked entities for some entity.
+// By default result contains at most DEFAULT_RESULT_RECORDS_NUMBER records.
+// Set parameter top to a larger number to receive more.
+message LinkedEntityListRequest
+{
+    // Entity identifier.
+    optional string id = 1;
+
+    // optionally restrict results by returning the first 'top' records.
+    optional uint32 top = 2;
+}
+
+// Result of linked entities request operation.
+message LinkedEntityListResult
+{
+    repeated NamedEntity entities = 1;
+
+    // This flag is set to true if all results are sent
+    // and nothing was filtered out by 'top' parameter.
+    optional bool is_complete = 2 [default = true];
+}
+
+// Common message for sales series list result.
+message SalesSeriesListResult
+{
+    repeated SalesSeriesInfo sales_series = 1;
+
+    // This flag is set to true if all results are sent
+    // and nothing was filtered out by 'top' parameter.
+    optional bool is_complete = 2 [default = true];
+}
+
+// Represents sales series.
+message SalesSeriesInfo
+{
+    // Sales series ID.
+    optional string id = 1;
+
+    // Sales series name.
+    optional string sales_series_name = 2;
+
+    // Sales series number.
+    optional string sales_series_number = 3;
+
+    // Sales series profile id.
+    optional string profile_id = 4;
+}
+
+// Authentication activity types.
+enum AuthActivityType
+{
+    // Login.
+    LOGIN = 1;
+
+    // Password change.
+    PASSWORD_CHANGE = 2;
+
+    // Clear lockout (from CAST).
+    CLEAR_LOCKOUT = 3;
+
+    // Change 2FA
+    CHANGE_2FA = 4;
+
+    // Erase 2FA
+    ERASE_2FA = 5;
+
+    // Erase password
+    ERASE_PASSWORD = 6;
+}
+
+// Parameters of external authentication.
+message ExternalAuth
+{
+    // [required] ID of external authentication partner, if any.
+    optional string partner_id = 1;
+
+    // [required] Username as registered by authentication partner, if any (max length = 255).
+    // UTF8 encoding string.
+    optional string username = 2;
+}
+
+// Request for update login billing custom data.
+message UpdateLoginBillingCustomData
+{
+    // [required] Login identifier.
+    optional string login_id = 1;
+
+    // [required] Login billing custom data.
+    repeated LoginBillingCustomData login_billing_custom_data = 2;
+}
+
+// Result of UpdateLoginBillingCustomData.
+message UpdateLoginBillingCustomDataResult
+{
+}
+
+message LoginBillingCustomData
+{
+    // [required] Account identifier.
+    optional string account_id = 1;
+
+    // Billing custom data.
+    // Maximum count is 3 (max length = 256).
+    repeated string billing_custom_data = 2;
+}
+
+// Request of login billing custom data.
+message LoginBillingCustomDataRequest
+{
+    // [required] Login identifier.
+    optional string login_id = 1;
+}
+
+// Result of LoginBillingCustomDataRequest.
+message LoginBillingCustomDataResult
+{
+    // Login billing custom data.
+    repeated LoginBillingCustomData login_billing_custom_data = 1;
+}
+
+// Profile information.
+message Profile
+{
+    // [optional] List of field ids to clear during update operation.
+    repeated uint32 cleared_fields = 9;
+
+    // [immutable][required-update] Associated customer.
+    // Use profile_id instead.
+    optional string customer_id = 1;
+
+    // [required-create] Profile legal type.
+    // Profile of admin profile type can be only Individual.
+    // This field is associated with common_1.LegalType enum type.
+    // Supported profile type: customer, admin.
+    optional uint32 legal_type = 2;
+
+    // Profile name (max length = 32).
+    // [required-create] for customer/admin and non-Individual legal types.
+    // [immutable] for Individual legal type.
+    optional string name = 3;
+
+    // Profile contact information.
+    optional ContactInformation contact_information = 4;
+
+    // Brokerage ID.
+    // Provide the field id in cleared_fields to reset the value during update operation.
+    // Can be cleared only for admin profile type.
+    // [required] for customer and sales series type.
+    optional string linked_brokerage_id = 5;
+
+    // [immutable] Removed flag.
+    optional bool removed = 6;
+
+    // [obsolete] Authentication system of login (LoginSettings.authentication_system field) must be used instead.
+    // Profile's authentication system.
+    // LookupPropertyListRequest { property_type = CommonLookupPropertyType.AUTHENTICATION_SYSTEM }
+    optional string obsolete_authentication_system = 7 [deprecated = true];
+
+    // Profile type - represents main type of profile.
+    // This field is associated with Profile.ProfileType enum type.
+    // [immutable] for profile type: sales series.
+    optional uint32 profile_type = 8 [default = 1];
+
+    // 9 is used for cleared_fields.
+
+    // [required-update] Profile identifier.
+    // For backward compatibility if customer id is given, it isn't required during update.
+    optional string profile_id = 11;
+
+    // [immutable] Associated sales series id.
+    optional string sales_series_id = 12;
+
+    // [required-create] Unique number (max length = 16).
+    // Supported profile type: sales series.
+    optional string number = 13;
+}
+
+// List of possible profile legal types.
+enum LegalType
+{
+    // Individual.
+    INDIVIDUAL = 1;
+
+    // Joint-stock company.
+    JOINT = 2;
+
+    // Limited partnership.
+    LIMITED = 3;
+
+    // Trust company.
+    TRUST = 4;
+
+    // Corporate group.
+    CORPORATE = 5;
+
+    // General partnership.
+    PARTNERSHIP = 6;
+}
+
+enum ProfileType
+{
+    PROFILE_TYPE_CUSTOMER = 1;
+    PROFILE_TYPE_ADMIN = 2;
+    PROFILE_TYPE_BROKERAGE = 3;
+    PROFILE_TYPE_SUBSCRIBER = 4;
+    PROFILE_TYPE_SALES_SERIES = 5;
+}
+
+enum InternalEntityType
+{
+    INTERNAL_ENTITY_TYPE_ACCOUNT = 1;
+    INTERNAL_ENTITY_TYPE_ORDER = 2;
+    INTERNAL_ENTITY_TYPE_TRADER = 3;
+    INTERNAL_ENTITY_TYPE_CUSTOMER = 4;
+    INTERNAL_ENTITY_TYPE_SYSTEM = 5;
+    INTERNAL_ENTITY_TYPE_CAST_USER = 6;
+    INTERNAL_ENTITY_TYPE_SALES_SERIES = 7;
+    INTERNAL_ENTITY_TYPE_FCM = 8;
+}

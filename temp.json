@@ -1,0 +1,11 @@
+{
+  'books': [
+    {
+      'author_id': 1,
+      'title': 'Fight Club',
+      'id': 1
+    }
+  ],
+  'name': 'Chuck Paluhniuk',
+  'id': 1
+}

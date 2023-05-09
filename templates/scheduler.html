@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<style>
+    a {
+        color: red;
+    }
+</style>
+
+<form method="POST" action="/scheduler">
+    {{ form.instance.label }} {{ form.instance(size=3)}}
+    <br>
+    {{ form.time.label }} {{ form.time(size=3)}}
+    <br>
+    <input type="submit" name="Start" value="Start">
+    <input type="submit" name="Stop" value="Remove All Jobs">
+    <a>{{status}}</a>
+    <br>
+    <br>
+    <a>{{jobs}}</a>
+</form>
+
+</body>
+
+</html>
