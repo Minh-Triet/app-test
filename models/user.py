@@ -5,8 +5,8 @@ class UserModel(db.Model):
     __tablename__ = "Users"
 
     Id = db.Column(db.BIGINT, primary_key=True, autoincrement=True)
-    UserName = db.Column(db.NVARCHAR(1000), nullable=False, unique=True)
-    PassWord = db.Column(db.NVARCHAR(1000), nullable=False)
+    UserName = db.Column(db.String(1000), nullable=False, unique=True)
+    PassWord = db.Column(db.String(1000), nullable=False)
 
     @classmethod
     def find_by_username(cls, username: str) -> "UserModel":
