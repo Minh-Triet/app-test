@@ -56,7 +56,7 @@ class TradeCQG(db.Model):
     MaturityDate = db.Column(db.DateTime)
     ManualOrderIndicator = db.Column(db.Boolean)
     StatementDate = db.Column(db.DateTime)
-    OrderSource = db.Column(db.String(100)(24))
+    OrderSource = db.Column(db.String(100))
     TradeID = db.Column(db.String(100))
     ChainOrderID = db.Column(db.String(100))
     OrderPlacementTime = db.Column(db.DateTime)
