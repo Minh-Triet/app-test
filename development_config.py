@@ -3,7 +3,7 @@ from urllib.parse import quote
 
 DEBUG = False
 
-SQLALCHEMY_DATABASE_URI = f'mysql://root:{quote("12345")}@localhost/apitest'
+SQLALCHEMY_DATABASE_URI = f'mysql://root:{quote("12345")}@10.128.7.135/apitest'
 
 logging.basicConfig()
 logging.getLogger('apscheduler').setLevel(logging.DEBUG)
