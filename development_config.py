@@ -1,13 +1,15 @@
-import datetime
+import logging
 from urllib.parse import quote
 
-from loguru import logger
-
-
 DEBUG = False
-SQLALCHEMY_DATABASE_URI = f'mssql+pymssql://sa:{quote("123456789aA")}@Banana\\SQLEXPRESS\\treasury'
+
+SQLALCHEMY_DATABASE_URI = f'mysql://root:{quote("12345")}@10.128.19.7/apitest'
+
+logging.basicConfig()
+logging.getLogger('apscheduler').setLevel(logging.DEBUG)
+
 SQLALCHEMY_TRACK_MODIFICATIONS = False
-PROPAGATE_EXCEPTIONS = True
+# PROPAGATE_EXCEPTIONS = True
 DEBUG_METRICS = True
 SCHEDULER_API_ENABLED = True
 

@@ -1,0 +1,1 @@
+exec gunicorn --bind "app:create_app()"

@@ -29,3 +29,7 @@ xmltodict~=0.13.0
 APScheduler
 WTForms
 Flask-WTF
+mysql
+pyodbc
+pymongo
+

@@ -1,13 +1,18 @@
+import time
 from datetime import datetime
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask import make_response, render_template, request
 from flask_restful import Resource
 from flask_wtf import FlaskForm
 from loguru import logger
+from sqlalchemy.exc import SQLAlchemyError
 from wtforms import IntegerField
 from wtforms.validators import DataRequired, NumberRange
+
+from development_config import SQLALCHEMY_DATABASE_URI
 
 isStart = False
 
@@ -17,7 +22,9 @@ def walk():
 
 
 def swim():
-    print('demo2')
+    for a in range(30):
+        time.sleep(1)
+        print(a)
 
 
 class MyForm(FlaskForm):
@@ -42,10 +49,11 @@ class Scheduler(Resource):
             form = MyForm()
         try:
             if request.form.get('Start') == 'Start':
+                jobs = ''
                 instance = request.form.get('instance')
                 time = request.form.get('time')
                 jobstores = {
-                    'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
+                    'default': SQLAlchemyJobStore(url=SQLALCHEMY_DATABASE_URI, tablename='jobs_stores')
                 }
 
                 executors = {
@@ -57,6 +65,7 @@ class Scheduler(Resource):
                     'max_instances': instance
                 }
                 if isStart is False:
+
                     scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors,
                                                     job_defaults=job_defaults, timezone='Asia/ho_chi_minh')
 
@@ -69,6 +78,7 @@ class Scheduler(Resource):
                     scheduler.start()
 
                 isStart = True
+
                 jobs = scheduler.get_jobs()
                 if isStart is True and jobs is not None:
                     jobs = scheduler.get_jobs()
@@ -85,7 +95,7 @@ class Scheduler(Resource):
                     scheduler.shutdown()
                     isStart = False
 
-        except BaseException as e:
+        except SQLAlchemyError as e:
             logger.debug(e)
             status = e
 
