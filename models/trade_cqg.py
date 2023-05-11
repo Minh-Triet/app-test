@@ -23,7 +23,7 @@ class TradeCQG(db.Model):
     SenderCompID = db.Column(db.String(32))
     SendingTime = db.Column(db.DateTime)
     TargetCompID = db.Column(db.String(32))
-    TargetSubID = db.Column(db.String)
+    TargetSubID = db.Column(db.String(100))
     DeliverToSubID = db.Column(db.String(32))
     TargetLocationID = db.Column(db.String(12))
     Account = db.Column(db.String(32))
