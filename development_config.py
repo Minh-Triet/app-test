@@ -1,9 +1,15 @@
 import logging
 from urllib.parse import quote
 
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.schedulers.background import BackgroundScheduler
+
 DEBUG = False
 
-SQLALCHEMY_DATABASE_URI = f'mysql://root:{quote("12345")}@10.128.7.135/apitest'
+SQLALCHEMY_DATABASE_URI = f'mysql://sa:{quote("12345")}@10.128.7.118/apitest'
+# SQLALCHEMY_DATABASE_URI = f'mssql://sa:{quote("123456789aA")}@Banana\\SQLEXPRESS/treasury?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server'
+
 
 logging.basicConfig()
 logging.getLogger('apscheduler').setLevel(logging.DEBUG)
@@ -12,6 +18,23 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 # PROPAGATE_EXCEPTIONS = True
 DEBUG_METRICS = True
 SCHEDULER_API_ENABLED = True
+
+jobstores = {
+    'default': SQLAlchemyJobStore(url=SQLALCHEMY_DATABASE_URI, tablename='jobs_stores')
+}
+
+executors = {
+    'default': ThreadPoolExecutor(20),
+    'processpool': ProcessPoolExecutor(5)
+}
+
+job_defaults = {
+    'coalesce': False,
+    'max_instances': 1
+}
+
+scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors,
+                                job_defaults=job_defaults, timezone='Asia/ho_chi_minh')
 
 
 class Config:

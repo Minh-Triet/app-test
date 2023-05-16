@@ -5,8 +5,8 @@ services:
     build:
       context: ./
     restart: unless-stopped
-    container_name: app-api-twl
-    image: app-api-wap
+    container_name: app-api-yue
+    image: app-api-yue
     ports:
       - "5000:5000"
     networks:

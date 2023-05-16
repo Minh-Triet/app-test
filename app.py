@@ -1,5 +1,6 @@
 import asyncio
 import os
+import time
 
 import nest_asyncio
 from dotenv import load_dotenv
@@ -11,11 +12,9 @@ from prometheus_flask_exporter import RESTfulPrometheusMetrics
 
 import ma
 from db import db
-from resources.cmsapi import CmsApi
-from resources.customer import Customer, CustomerList, CustomerDetail
-from resources.scheduler import Scheduler
-from resources.trade import Trade, TradeList, TradeDetail
-from resources.trade_cqg import TradeCQG
+from development_config import scheduler
+from models.shceduler import SchedulerManager, add_scheduler_running, select_scheduler_run, update_status, select_ip_run
+from resources.scheduler import Scheduler, swim, walk
 
 app = Flask(__name__)
 load_dotenv('.env.example', verbose=True)
@@ -42,40 +41,35 @@ def handle_marshmallow_validation(err):
     return jsonify(err.message), 400
 
 
-api.add_resource(Trade, '/trades')
-api.add_resource(TradeDetail, '/trade/<int:_id>')
-api.add_resource(TradeList, '/trades')
-api.add_resource(Customer, '/customer')
-api.add_resource(CustomerDetail, '/customer/<int:_id>')
-api.add_resource(CustomerList, '/customers')
-api.add_resource(TradeCQG, '/cqg')
-api.add_resource(CmsApi, '/cmsapi')
 api.add_resource(Scheduler, '/scheduler')
 
-import requests
+import socket
 
-# a = requests.get('http://127.0.0.1:5000/cqg')
-# print(a.text)
-# # proxies = {'http': 'user:pass@10.10.10.10'}
-#
-# r = requests.get('wss://democmsapi.cqg.com:443')
-#
-# print(f'Status Code: {r.status_code}')
+ip_name = socket.gethostname()
+ip_host = socket.gethostbyname(ip_name)
+with app.app_context():
+    if scheduler.state == 0:
+        check_ip = select_ip_run()
+        for ip in check_ip:
+            if ip == ip_host:
+                scheduler.start()
+            else:
+                SchedulerManager.ip_address = ip_host
+                SchedulerManager.status = 'Running'
+                id_exist = add_scheduler_running()
+                time.sleep(3)
+                check_id = select_scheduler_run()
+                if check_id[0] == id_exist:
+                    jobs = scheduler.get_jobs()
+                    if not jobs:
+                        scheduler.add_job(walk, 'interval', seconds=20, id='Job_1_demo',
+                                          replace_existing=True)
 
-# ws = websocket.WebSocket()
-# ws.connect("wss://democmsapi.cqg.com:443", http_proxy_host="192.168.95.100", http_proxy_port=3128)
-# var = ws.recv()
-# print(var)
-
-# ws = websocket.WebSocket()
-# ws.connect("ws://democmsapi.cqg.com:443",
-#            http_proxy_host="192.168.95.100", http_proxy_port="3128",
-#            proxy_type="http")
-# ws.send("Hello, Server")
-# print(ws.recv())
-# ws.close()
-
-
+                        scheduler.add_job(swim, 'interval', seconds=30, id='Job_2_demo',
+                                          replace_existing=True)
+                else:
+                    scheduler.shutdown()
+                    update_status(id_exist)
 if __name__ == '__main__':
     ma.ma.init_app(app)
-    app.run(debug=True, host='0.0.0.0', use_reloader=False)
+    app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)

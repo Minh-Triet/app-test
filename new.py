@@ -1,8 +1,5 @@
-def my_function(x):
-    return x[::-1]
+import datetime
 
+import pytz
 
-mytxt = my_function("ToT")
-
-print(mytxt)
-
+print(datetime.datetime.now(pytz.timezone('Asia/ho_chi_minh')))
