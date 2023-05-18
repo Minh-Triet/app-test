@@ -6,8 +6,8 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
 
 DEBUG = False
-
-SQLALCHEMY_DATABASE_URI = f'mysql://sa:{quote("12345")}@10.128.7.118/apitest'
+#
+SQLALCHEMY_DATABASE_URI = f'mysql://sa:{quote("12345")}@10.128.19.97/apitest'
 # SQLALCHEMY_DATABASE_URI = f'mssql://sa:{quote("123456789aA")}@Banana\\SQLEXPRESS/treasury?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server'
 
 

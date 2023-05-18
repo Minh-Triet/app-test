@@ -31,7 +31,7 @@ def add_scheduler_running():
 
 def select_scheduler_run():
     listID = []
-    collects = db.session.execute(text(f"SELECT id FROM [dbo].[SchedulerManager] WHERE status='running'"))
+    collects = db.session.execute(text(f"SELECT id FROM SchedulerManager WHERE status='running';"))
     for item in collects:
         listID.append(item[0])
     logger.debug(listID)
@@ -40,7 +40,7 @@ def select_scheduler_run():
 
 def select_ip_run():
     listID = []
-    collects = db.session.execute(text(f"SELECT ip_address FROM [dbo].[SchedulerManager] WHERE status='running'"))
+    collects = db.session.execute(text(f"SELECT ip_address FROM SchedulerManager WHERE status='running';"))
     for item in collects:
         listID.append(item[0])
     logger.debug(listID)
@@ -48,10 +48,10 @@ def select_ip_run():
 
 
 def update_status(id):
-    db.session.execute(text(f"UPDATE [dbo].[SchedulerManager] set status='not running' WHERE id='{id}'"))
+    db.session.execute(text(f"UPDATE SchedulerManager set status='not running' WHERE id='{id}';"))
     db.session.commit()
 
 
 def update_status_not_running():
-    db.session.execute(text(f"UPDATE [dbo].[SchedulerManager] set status='not running' WHERE status='running'"))
+    db.session.execute(text(f"UPDATE SchedulerManager set status='not running' WHERE status='running';"))
     db.session.commit()
