@@ -70,8 +70,9 @@ class Scheduler(Resource):
                 # if isStart is False:
                 # status = 'No jobs are running.'
                 scheduler.remove_all_jobs()
-                with app.app_context():
-                    update_status_not_running()
+                lock.release()
+                # with app.app_context():
+                #     update_status_not_running()
                 status = 'All jobs have been removed.'
                 jobs = ''
                 isStart = False

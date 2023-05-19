@@ -22,14 +22,13 @@ alembic~=1.8.1
 gunicorn
 prometheus-flask-exporter
 prometheus-client
-# quickfix~=1.15.1
 marshmallow~=3.19.0
 Werkzeug~=2.2.2
 xmltodict~=0.13.0
-APScheduler
-WTForms
+APScheduler~=3.10.1
+WTForms~=3.0.1
 Flask-WTF
 mysql
 pyodbc
 pymongo
-
+redis~=4.5.5

@@ -1,15 +1,15 @@
 import logging
 from urllib.parse import quote
-
+from redis.cluster import RedisCluster
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.jobstores.redis import RedisJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
+from redis import Redis
 
 DEBUG = False
 #
-SQLALCHEMY_DATABASE_URI = f'mysql://sa:{quote("12345")}@10.128.19.97/apitest'
+SQLALCHEMY_DATABASE_URI = f'mysql://sa:{quote("12345")}@10.128.21.235/apitest'
 # SQLALCHEMY_DATABASE_URI = f'mssql://sa:{quote("123456789aA")}@Banana\\SQLEXPRESS/treasury?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server'
-
 
 logging.basicConfig()
 logging.getLogger('apscheduler').setLevel(logging.DEBUG)
@@ -19,8 +19,13 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 DEBUG_METRICS = True
 SCHEDULER_API_ENABLED = True
 
+# jobstores = {
+#     'default': SQLAlchemyJobStore(url=SQLALCHEMY_DATABASE_URI, tablename='jobs_stores')
+# }
+
 jobstores = {
-    'default': SQLAlchemyJobStore(url=SQLALCHEMY_DATABASE_URI, tablename='jobs_stores')
+    'default': RedisJobStore(jobs_key='dispatched_trips_jobs', run_times_key='dispatched_trips_running',
+                             host='localhost', port=6379)
 }
 
 executors = {
@@ -35,6 +40,8 @@ job_defaults = {
 
 scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors,
                                 job_defaults=job_defaults, timezone='Asia/ho_chi_minh')
+
+redis = RedisCluster(host='localhost', port=6379, decode_responses=True)
 
 
 class Config:
