@@ -41,7 +41,7 @@ job_defaults = {
 scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors,
                                 job_defaults=job_defaults, timezone='Asia/ho_chi_minh')
 
-redis = Redis(url='redis://localhost:6379', decode_responses=True)
+redis = Redis(host='localhost',port=6379, decode_responses=True)
 
 
 class Config:
