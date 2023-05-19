@@ -25,7 +25,7 @@ SCHEDULER_API_ENABLED = True
 
 jobstores = {
     'default': RedisJobStore(jobs_key='dispatched_trips_jobs', run_times_key='dispatched_trips_running',
-                             url='redis://localhost:6379')
+                             url='redis://localhost:6379',db=0)
 }
 
 executors = {
