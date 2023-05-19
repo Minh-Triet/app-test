@@ -25,7 +25,7 @@ SCHEDULER_API_ENABLED = True
 
 jobstores = {
     'default': RedisJobStore(jobs_key='dispatched_trips_jobs', run_times_key='dispatched_trips_running',
-                             url=redis://localhost:6379/0)
+                             url='redis://localhost:6379/0')
 }
 
 executors = {
@@ -41,7 +41,7 @@ job_defaults = {
 scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors,
                                 job_defaults=job_defaults, timezone='Asia/ho_chi_minh')
 
-redis = RedisCluster(url=redis://localhost:6379/0, decode_responses=True)
+redis = RedisCluster(url='redis://localhost:6379/0', decode_responses=True)
 
 
 class Config:
