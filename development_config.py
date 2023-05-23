@@ -8,7 +8,7 @@ from redis import Redis
 
 DEBUG = False
 #
-SQLALCHEMY_DATABASE_URI = f'mysql://sa:{quote("12345")}@10.128.21.235/apitest'
+SQLALCHEMY_DATABASE_URI = f'mysql://sa:{quote("12345")}@10.128.43.117/apitest'
 # SQLALCHEMY_DATABASE_URI = f'mssql://sa:{quote("123456789aA")}@Banana\\SQLEXPRESS/treasury?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server'
 
 logging.basicConfig()
@@ -25,7 +25,7 @@ SCHEDULER_API_ENABLED = True
 
 jobstores = {
     'default': RedisJobStore(jobs_key='dispatched_trips_jobs', run_times_key='dispatched_trips_running',
-                             host='localhost',port=6379)
+                             host='10.0.148.113',port=6379)
 }
 
 executors = {
@@ -41,7 +41,7 @@ job_defaults = {
 scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors,
                                 job_defaults=job_defaults, timezone='Asia/ho_chi_minh')
 
-redis = Redis(host='localhost',port=6379, decode_responses=True)
+redis = Redis(host='10.0.148.113',port=6379, decode_responses=True)
 
 
 class Config:
