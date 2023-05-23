@@ -1,11 +1,9 @@
 import logging
 from urllib.parse import quote
-from redis.cluster import RedisCluster
+
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
-from apscheduler.jobstores.redis import RedisJobStore
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
-from redis import Redis
-import os
 
 DEBUG = False
 #
@@ -20,14 +18,14 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 DEBUG_METRICS = True
 SCHEDULER_API_ENABLED = True
 
-# jobstores = {
-#     'default': SQLAlchemyJobStore(url=SQLALCHEMY_DATABASE_URI, tablename='jobs_stores')
-# }
-redis_host = os.environ.get('REDIS_HOST', 'localhost')
 jobstores = {
-    'default': RedisJobStore(jobs_key='dispatched_trips_jobs', run_times_key='dispatched_trips_running',
-                             host=redis_host,port=6379)
+    'default': SQLAlchemyJobStore(url=SQLALCHEMY_DATABASE_URI, tablename='jobs_stores')
 }
+
+# jobstores = {
+#     'default': RedisJobStore(jobs_key='dispatched_trips_jobs', run_times_key='dispatched_trips_running',
+#                              host='10.0.148.113',port=6379)
+# }
 
 executors = {
     'default': ThreadPoolExecutor(20),
@@ -41,8 +39,6 @@ job_defaults = {
 
 scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors,
                                 job_defaults=job_defaults, timezone='Asia/ho_chi_minh')
-
-redis = Redis(host=redis_host,port=6379, decode_responses=True)
 
 
 class Config:

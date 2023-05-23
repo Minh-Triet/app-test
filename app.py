@@ -1,5 +1,6 @@
 import asyncio
 import os
+import time
 
 import nest_asyncio
 from dotenv import load_dotenv
@@ -11,8 +12,9 @@ from prometheus_flask_exporter import RESTfulPrometheusMetrics
 
 import ma
 from db import db
-from development_config import scheduler, redis
-from resources.scheduler import Scheduler, swim, walk
+from development_config import scheduler
+from models.shceduler import SchedulerManager, add_scheduler_running, select_scheduler_run, update_status, select_ip_run
+from resources.scheduler import Scheduler, walk, swim
 
 app = Flask(__name__)
 load_dotenv('.env.example', verbose=True)
@@ -41,48 +43,18 @@ def handle_marshmallow_validation(err):
 
 api.add_resource(Scheduler, '/scheduler')
 
-# def create_scheduler():
-#     if scheduler.state == 0:
-#         scheduler.start()
-#
-#     SchedulerManager.ip_address = ip_host
-#     SchedulerManager.status = 'Running'
-#     id_exist = add_scheduler_running()
-#     time.sleep(3)
-#     check_id = select_scheduler_run()
-#
-#     if check_id[0] == id_exist:
-#         jobs = scheduler.get_jobs()
-#         if not jobs:
-#             scheduler.add_job(walk, 'interval', seconds=20, id='Job_1_demo',
-#                               replace_existing=True)
-#
-#             scheduler.add_job(swim, 'interval', seconds=30, id='Job_2_demo',
-#                               replace_existing=True)
-#     else:
-#         scheduler.shutdown()
-#         update_status(id_exist)
-#
-#
-# # import socket
-# #
-# # ip_name = socket.gethostname()
-# # ip_host = socket.gethostbyname(ip_name)
-# #
-# # with app.app_context():
-# #     check_ip = select_ip_run()
-# #     if check_ip:
-# #         for ip in check_ip:
-# #             if ip == ip_host:
-# #                 scheduler.start()
-# #             else:
-# #                 create_scheduler()
-# #     else:
-# #         create_scheduler()
-lock = redis.lock('api-test', 180)
-if lock.acquire(blocking=False):
+
+def create_scheduler():
     if scheduler.state == 0:
         scheduler.start()
+
+    SchedulerManager.ip_address = ip_host
+    SchedulerManager.status = 'Running'
+    id_exist = add_scheduler_running()
+    time.sleep(3)
+    check_id = select_scheduler_run()
+
+    if check_id[0] == id_exist:
         jobs = scheduler.get_jobs()
         if not jobs:
             scheduler.add_job(walk, 'interval', seconds=20, id='Job_1_demo',
@@ -90,6 +62,26 @@ if lock.acquire(blocking=False):
 
             scheduler.add_job(swim, 'interval', seconds=30, id='Job_2_demo',
                               replace_existing=True)
+    else:
+        scheduler.shutdown()
+        update_status(id_exist)
+
+
+import socket
+
+ip_name = socket.gethostname()
+ip_host = socket.gethostbyname(ip_name)
+
+with app.app_context():
+    check_ip = select_ip_run()
+    if check_ip:
+        for ip in check_ip:
+            if ip == ip_host:
+                scheduler.start()
+            else:
+                create_scheduler()
+    else:
+        create_scheduler()
 
 if __name__ == '__main__':
     ma.ma.init_app(app)
