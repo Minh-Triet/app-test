@@ -22,10 +22,10 @@ SCHEDULER_API_ENABLED = True
 # jobstores = {
 #     'default': SQLAlchemyJobStore(url=SQLALCHEMY_DATABASE_URI, tablename='jobs_stores')
 # }
-
+redis_host = os.environ.get('REDIS_HOST', 'localhost')
 jobstores = {
     'default': RedisJobStore(jobs_key='dispatched_trips_jobs', run_times_key='dispatched_trips_running',
-                             host='redis',port=6379)
+                             host=redis_host,port=6379)
 }
 
 executors = {
@@ -41,7 +41,7 @@ job_defaults = {
 scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors,
                                 job_defaults=job_defaults, timezone='Asia/ho_chi_minh')
 
-redis = Redis(host='redis',port=6379, decode_responses=True)
+redis = Redis(host=redis_host,port=6379, decode_responses=True)
 
 
 class Config:
