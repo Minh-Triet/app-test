@@ -2,6 +2,7 @@ FROM registry.redhat.io/ubi9/python-39@sha256:40a58935b9c22664927b22bf256f53a3d7
 EXPOSE 5000
 COPY . /app
 WORKDIR /app
+USER 0
 RUN /opt/app-root/bin/python3.9 -m pip install --upgrade pip
 RUN yum update -y
 #RUN pip install quickfix-1.15.1-cp39-cp39-linux_x86_64.whl
