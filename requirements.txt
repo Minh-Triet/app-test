@@ -32,3 +32,4 @@ mysql
 pyodbc
 pymongo
 redis~=4.5.5
+quickfix
