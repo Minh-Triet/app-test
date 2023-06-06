@@ -3,6 +3,8 @@ EXPOSE 5000
 COPY . /app
 WORKDIR /app
 USER 0
+RUN chgrp -R 0 temp && \
+    chmod -R g=u temp
 RUN /opt/app-root/bin/python3.9 -m pip install --upgrade pip
 RUN yum install -y gcc
 RUN yum update -y
