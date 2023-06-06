@@ -7,7 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 DEBUG = False
 
-SQLALCHEMY_DATABASE_URI = f'mysql://sa:{quote("12345")}@10.128.21.62/apitest'
+SQLALCHEMY_DATABASE_URI = f'mysql://sa:{quote("12345")}@localhost/apitest'
 # SQLALCHEMY_DATABASE_URI = f'mssql://sa:{quote("123456789aA")}@Banana\\SQLEXPRESS/treasury?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server'
 
 logging.basicConfig()

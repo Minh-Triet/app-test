@@ -8,6 +8,7 @@ from flask_migrate import Migrate
 from flask_restful import Api
 from marshmallow import ValidationError
 from prometheus_flask_exporter import RESTfulPrometheusMetrics
+import quickfix
 
 import ma
 from db import db
