@@ -15,7 +15,7 @@ def add_scheduler_running():
     global id_scheduler
     scheduler = SchedulerManager(
         ip_address=SchedulerManager.ip_address,
-        status=SchedulerManager.status,
+        status=SchedulerManager.status
     )
     try:
         db.session.add(scheduler)
