@@ -42,7 +42,7 @@ def select_ip_run():
     listID = []
     collects = db.session.execute(text(f"SELECT ip_address FROM SchedulerManager WHERE status='running';"))
     for item in collects:
-        listID.append(item[0])
+        listID.append(item['ip_address'])
     logger.debug(listID)
     return listID
 

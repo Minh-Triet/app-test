@@ -17,7 +17,7 @@ isStart = False
 
 def walk():
     logger.debug(datetime.now())
-
+    logger.debug(scheduler.state)
 
 def swim():
     for a in range(30):
@@ -69,7 +69,8 @@ class Scheduler(Resource):
             if request.form.get('Stop') == 'Remove All Jobs':
                 # if isStart is False:
                 # status = 'No jobs are running.'
-                scheduler.remove_all_jobs()
+                scheduler.resume_job('Job_1_demo')
+                scheduler.resume_job('Job_2_demo')
                 # lock.release()
                 with app.app_context():
                     update_status_not_running()

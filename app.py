@@ -1,6 +1,7 @@
 import asyncio
 import os
 import time
+
 import nest_asyncio
 from dotenv import load_dotenv
 from flask import Flask, jsonify
@@ -8,12 +9,12 @@ from flask_migrate import Migrate
 from flask_restful import Api
 from marshmallow import ValidationError
 from prometheus_flask_exporter import RESTfulPrometheusMetrics
-import quickfix
 
 import ma
 from db import db
 from development_config import scheduler
-from models.shceduler import SchedulerManager, add_scheduler_running, select_scheduler_run, update_status, select_ip_run
+from models.shceduler import SchedulerManager, add_scheduler_running, select_scheduler_run, update_status, \
+    select_ip_run, update_status_not_running
 from resources.scheduler import Scheduler, walk, swim
 
 app = Flask(__name__)
@@ -53,7 +54,6 @@ def create_scheduler():
     id_exist = add_scheduler_running()
     time.sleep(3)
     check_id = select_scheduler_run()
-
     if check_id[0] == id_exist:
         jobs = scheduler.get_jobs()
         if not jobs:
@@ -63,8 +63,15 @@ def create_scheduler():
             scheduler.add_job(swim, 'interval', seconds=30, id='Job_2_demo',
                               replace_existing=True)
     else:
-        scheduler.shutdown()
+        scheduler.resume_job('Job_1_demo')
+        scheduler.resume_job('Job_2_demo')
         update_status(id_exist)
+
+
+def job_start():
+    if scheduler.state == 1:
+        with app.app_context():
+            update_status_not_running()
 
 
 import socket
@@ -74,10 +81,19 @@ ip_host = socket.gethostbyname(ip_name)
 
 with app.app_context():
     check_ip = select_ip_run()
+    scheduler.add_job(job_start, 'interval', seconds=120, id='koko',
+                      replace_existing=True)
     if check_ip:
         for ip in check_ip:
             if ip == ip_host:
                 scheduler.start()
+                job = scheduler.get_jobs()
+                if not job:
+                    scheduler.add_job(walk, 'interval', seconds=20, id='Job_1_demo',
+                                      replace_existing=True)
+
+                    scheduler.add_job(swim, 'interval', seconds=30, id='Job_2_demo',
+                                      replace_existing=True)
             else:
                 create_scheduler()
     else:
