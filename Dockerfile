@@ -2,7 +2,7 @@ FROM registry.redhat.io/ubi9/python-39@sha256:40a58935b9c22664927b22bf256f53a3d7
 EXPOSE 5000
 COPY . /app
 WORKDIR /app
-RUN /usr/local/bin/python -m pip install --upgrade pip
+#RUN /usr/local/bin/python -m pip install --upgrade pip
 #RUN pip install quickfix-1.15.1-cp39-cp39-linux_x86_64.whl
 #RUN echo "deb http://ftp.debian.org/debian sid main" >> /etc/apt/sources.list
 #RUN apt-get update
