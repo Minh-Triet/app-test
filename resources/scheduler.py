@@ -69,8 +69,8 @@ class Scheduler(Resource):
             if request.form.get('Stop') == 'Remove All Jobs':
                 # if isStart is False:
                 # status = 'No jobs are running.'
-                scheduler.resume_job('Job_1_demo')
-                scheduler.resume_job('Job_2_demo')
+                scheduler.remove_job('Job_1_demo')
+                scheduler.remove_job('Job_2_demo')
                 # lock.release()
                 with app.app_context():
                     update_status_not_running()

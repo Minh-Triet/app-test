@@ -48,19 +48,17 @@ api.add_resource(Scheduler, '/scheduler')
 def create_scheduler():
     if scheduler.state == 0:
         scheduler.start()
-
     SchedulerManager.ip_address = ip_host
     SchedulerManager.status = 'Running'
     id_exist = add_scheduler_running()
     time.sleep(3)
     check_id = select_scheduler_run()
     if check_id[0] == id_exist:
-        jobs1 = scheduler.get_job('Job_1_demo')
-        jobs2 = scheduler.get_job('Job_2_demo')
-        if not jobs1 or not jobs2:
+        job1 = scheduler.get_job('Job_1_demo')
+        job2 = scheduler.get_job('Job_2_demo')
+        if not job1 or not job2:
             scheduler.add_job(walk, 'interval', seconds=20, id='Job_1_demo',
                               replace_existing=True)
-
             scheduler.add_job(swim, 'interval', seconds=30, id='Job_2_demo',
                               replace_existing=True)
     else:
@@ -86,15 +84,15 @@ with app.app_context():
     if check_ip:
         for ip in check_ip:
             if ip == ip_host:
-                scheduler.start()
-                jobs1 = scheduler.get_job('Job_1_demo')
-                jobs2 = scheduler.get_job('Job_2_demo')
-                if not jobs1 or not jobs2:
-                    scheduler.add_job(walk, 'interval', seconds=20, id='Job_1_demo',
-                                      replace_existing=True)
-
-                    scheduler.add_job(swim, 'interval', seconds=30, id='Job_2_demo',
-                                      replace_existing=True)
+                if scheduler.state == 0:
+                    scheduler.start()
+                    jobs1 = scheduler.get_job('Job_1_demo')
+                    jobs2 = scheduler.get_job('Job_2_demo')
+                    if not jobs1 or not jobs2:
+                        scheduler.add_job(walk, 'interval', seconds=20, id='Job_1_demo',
+                                          replace_existing=True)
+                        scheduler.add_job(swim, 'interval', seconds=30, id='Job_2_demo',
+                                          replace_existing=True)
             else:
                 create_scheduler()
     else:
