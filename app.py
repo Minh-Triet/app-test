@@ -55,8 +55,9 @@ def create_scheduler():
     time.sleep(3)
     check_id = select_scheduler_run()
     if check_id[0] == id_exist:
-        jobs = scheduler.get_jobs()
-        if not jobs:
+        jobs1 = scheduler.get_job('Job_1_demo')
+        jobs2 = scheduler.get_job('Job_2_demo')
+        if not jobs1 or not jobs2:
             scheduler.add_job(walk, 'interval', seconds=20, id='Job_1_demo',
                               replace_existing=True)
 
@@ -87,8 +88,9 @@ with app.app_context():
         for ip in check_ip:
             if ip == ip_host:
                 scheduler.start()
-                job = scheduler.get_jobs()
-                if not job:
+                jobs1 = scheduler.get_job('Job_1_demo')
+                jobs2 = scheduler.get_job('Job_2_demo')
+                if not jobs1 or not jobs2:
                     scheduler.add_job(walk, 'interval', seconds=20, id='Job_1_demo',
                                       replace_existing=True)
 
