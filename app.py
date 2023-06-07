@@ -64,8 +64,8 @@ def create_scheduler():
             scheduler.add_job(swim, 'interval', seconds=30, id='Job_2_demo',
                               replace_existing=True)
     else:
-        scheduler.resume_job('Job_1_demo')
-        scheduler.resume_job('Job_2_demo')
+        scheduler.remove_job('Job_1_demo')
+        scheduler.remove_job('Job_2_demo')
         update_status(id_exist)
 
 
