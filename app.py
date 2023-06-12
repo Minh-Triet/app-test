@@ -79,8 +79,7 @@ ip_host = socket.gethostbyname(ip_name)
 
 with app.app_context():
     check_ip = select_ip_run()
-    scheduler.add_job(job_start, 'interval', seconds=120, id='koko',
-                      replace_existing=True)
+    scheduler.add_job(job_start, 'interval', seconds=120, id='koko', replace_existing=True)
     if check_ip:
         for ip in check_ip:
             if ip == ip_host:
