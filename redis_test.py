@@ -1,5 +1,6 @@
-import random
+n = [2, 4, 6, 8]
+res = 1
+for x in n[1:3]:
+  res *= x
 
-lists = [1, 2, 3, 4]
-a = random.choice(lists)
-print(a)
+print(res)
