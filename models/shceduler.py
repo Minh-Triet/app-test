@@ -52,6 +52,9 @@ def update_status(id):
     db.session.commit()
 
 
+# def update_status_not_running():
+#     db.session.execute(text(f"UPDATE SchedulerManager set status='not running' WHERE status='running';"))
+#     db.session.commit()
 def update_status_not_running():
-    db.session.execute(text(f"UPDATE SchedulerManager set status='not running' WHERE status='running';"))
+    db.session.execute(text(f"Truncate table SchedulerManager;"))
     db.session.commit()
