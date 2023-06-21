@@ -11,7 +11,7 @@ from wtforms.validators import DataRequired, NumberRange
 
 from development_config import scheduler
 from models.shceduler import SchedulerManager, add_scheduler_running, update_status, \
-    select_scheduler_run
+    select_scheduler_run, update_status_not_running
 
 isStart = False
 
@@ -42,7 +42,7 @@ class Scheduler(Resource):
     @classmethod
     def post(cls):
         global isStart, status, jobs
-        from main import app
+        from app import app
         with app.app_context():
             form = MyForm()
         try:
@@ -73,8 +73,8 @@ class Scheduler(Resource):
                 scheduler.remove_job('Job_1_demo')
                 scheduler.remove_job('Job_2_demo')
                 # lock.release()
-                # with app.app_context():
-                #     update_status_not_running()
+                with app.app_context():
+                    update_status_not_running()
                 status = 'All jobs have been removed.'
                 jobs = ''
                 isStart = False
@@ -89,8 +89,6 @@ class Scheduler(Resource):
 
 
 def create_scheduler():
-    # from main import app
-
     import socket
     ip_name = socket.gethostname()
     ip_host = socket.gethostbyname(ip_name)

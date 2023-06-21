@@ -5,8 +5,8 @@ services:
     build:
       context: ./
     restart: unless-stopped
-    container_name: app-api
-    image: app-api
+    container_name: api-successful-test
+    image: api-successful-test
     ports:
       - "5000:5000"
     networks:

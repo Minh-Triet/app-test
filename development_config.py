@@ -7,8 +7,9 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 DEBUG = False
 #
-SQLALCHEMY_DATABASE_URI = f'mysql://sa:{quote("12345")}@10.128.18.40/apitest'
+SQLALCHEMY_DATABASE_URI = f'mysql://sa:{quote("12345")}@10.128.29.194/apitest'
 # SQLALCHEMY_DATABASE_URI = f'mssql://sa:{quote("123456789aA")}@Banana\\SQLEXPRESS/test?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server'
+# SQLALCHEMY_DATABASE_URI = f'mssql+pymssql://sa:{quote("123456789aA")}@Banana\\SQLEXPRESS/test?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server'
 
 logging.basicConfig()
 logging.getLogger('apscheduler').setLevel(logging.DEBUG)

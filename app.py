@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify
 from flask_migrate import Migrate
 from flask_restful import Api
+from loguru import logger
 from marshmallow import ValidationError
 from prometheus_flask_exporter import RESTfulPrometheusMetrics
 
@@ -32,7 +33,7 @@ def create_app():
     metrics = RESTfulPrometheusMetrics(app, api)
 
     # metrics.info("app_info", "App Info, this can be anything you want", version="1.0.0")
-
+    logger.debug('ABCDE')
     nest_asyncio.apply()
 
     @app.errorhandler(ValidationError)
@@ -40,33 +41,26 @@ def create_app():
         return jsonify(err.message), 400
 
     api.add_resource(Scheduler, '/scheduler')
-    with app.app_context():
-        id = create_scheduler()
 
-    def cleanup():
-        with app.app_context():
-            update_status(id)
-        pass
-
-    atexit.register(cleanup)
     return app
 
-# with app.app_context():
-#     check_ip = select_ip_run()
-#     scheduler.add_job(job_start, 'interval', seconds=1000, id='koko', replace_existing=True)
-#     if check_ip:
-#         for ip in check_ip:
-#             if ip == ip_host:
-#                 if scheduler.state == 0:
-#                     scheduler.start()
-#                     jobs1 = scheduler.get_job('Job_1_demo')
-#                     jobs2 = scheduler.get_job('Job_2_demo')
-#                     if not jobs1 or not jobs2:
-#                         scheduler.add_job(walk, 'interval', seconds=20, id='Job_1_demo',
-#                                           replace_existing=True)
-#                         scheduler.add_job(swim, 'interval', seconds=30, id='Job_2_demo',
-#                                           replace_existing=True)
-#             else:
-#                 create_scheduler()
-#     else:
-#         create_scheduler()
+
+def run_app():
+    if __name__ == '__main__':
+        with app.app_context():
+            id = create_scheduler()
+
+        def cleanup():
+            with app.app_context():
+                update_status(id)
+
+        atexit.register(cleanup)
+        logger.debug("Running app with gunicorn")
+
+
+app = create_app()
+run_app()
+if __name__ == '__main__':
+    # run any code that you want to run only as a script here
+    print("Running app as a script")
+    app.run(debug=True, host='0.0.0.0', port=5001, use_reloader=False)
